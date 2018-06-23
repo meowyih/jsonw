@@ -38,7 +38,7 @@ _All the sample code in this section is also available in main.cpp._
 
 ## Read json from utf8 data
 
-``` c++
+''' c++
 
     // literal 'u8' is not necessary if compiler uses utf8 as default 
     char jsondata[] = u8"{\"name\":\"meowyih\",\"age\":123}";
@@ -51,7 +51,7 @@ _All the sample code in this section is also available in main.cpp._
 
     delete json;
     
-```
+'''
 
 ## Read json from utf8 file
 
