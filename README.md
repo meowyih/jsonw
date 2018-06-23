@@ -83,26 +83,29 @@ _All the sample code in this section is also available in main.cpp._
 
 Assume I want to create a JsonTextW in the structure like this.
 
->
-> {
->     "txt1": "some text1",
->     "num1": 123,
->     "array": 
->     [
->         true,
->         {
->             "txt2": "some text2",
->             "num2": 456
->         }
->     ]
-> }
->
+``` json
+ {
+     "txt1": "some text1",
+     "num1": 123,
+     "array": 
+     [
+         true,
+         {
+             "txt2": "some text2",
+             "num2": 456
+         }
+     ]
+ }
+ 
+```
+
+Here is how to do it.
 
 ``` c++
 
     // create the outer JsonObjectW
     octillion::JsonObjectW* object1 = new octillion::JsonObjectW();
-    object1->add(u8"txt1", "some text1");
+    object1->add(u8"txt1", u8"some text1");
     object1->add(u8"num1", 123);
 
     // create the array
@@ -111,7 +114,7 @@ Assume I want to create a JsonTextW in the structure like this.
 
     // create the JsonObjectW inside array
     octillion::JsonObjectW* object2 = new octillion::JsonObjectW();
-    object2->add(u8"txt2", "some text2");
+    object2->add(u8"txt2", u8"some text2");
     object2->add(u8"num2", 456);
     array->add(object2);
 
