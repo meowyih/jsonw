@@ -1,15 +1,15 @@
-### JsonW - C++ Wide Character Json Tool
+# JsonW - C++ Wide Character Json Tool
 
 Author   | Email
 ---------|------------------
 Yih Horng|yhorng75@gmail.com
 
-## About JsonW tool
+# About JsonW tool
 
 *JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project. 
 There are plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue 1) it is fun and 2) I'm tired to read other people's license note. :grinning:
 
-## About Json 
+# About Json 
 
 General introduction is here: https://www.json.org/
 
@@ -24,19 +24,19 @@ Here is something that *JsonW* caller needs to know.
 3. A _object_ (JsonObjectW) is a set of name/_value_ (JsonValueW) pair. 
 4. An _array_ (JsonArrayW) is a collection of _value_ (JsonValueW).
 
-## About character set
+# About character set
 
 _wchar_t_ is 2 bytes in Windows and 4 bytes in linux. Since *JsonW* stores text data in _wchar_t_ underlying, *JsonW* supports all characters defined in USC2 in Windows and USC4 in Linux.
 
-## Installation
+# Installation
 
 Make sure the compiler supports C++11 and can find the header file _json.h_ and source file _json.cpp_.
 
-## Usage
+# Usage
 
 _All the sample code in this section is also available in main.cpp._
 
-# Read json from utf8 data
+## Read json from utf8 data
 
 ``` c++
 
@@ -53,7 +53,7 @@ _All the sample code in this section is also available in main.cpp._
     
 ```
 
-# Read json from utf8 file
+## Read json from utf8 file
 
 ``` c++
 
@@ -79,7 +79,7 @@ _All the sample code in this section is also available in main.cpp._
     
 ```
 
-# Create json programatically
+## Create json programatically
 
 Assume I want to create a JsonTextW in the structure like this.
 
@@ -129,7 +129,7 @@ Assume I want to create a JsonTextW in the structure like this.
 
 ```
 
-# Work with value
+## Work with value
 
 ``` c++
 
@@ -178,7 +178,7 @@ Assume I want to create a JsonTextW in the structure like this.
     
 ```
 
-# Work with object
+## Work with object
 
 ``` c++
 
@@ -229,7 +229,7 @@ Assume I want to create a JsonTextW in the structure like this.
     
 ```
 
-# Work with array
+## Work with array
 
 ``` c++
     
@@ -254,7 +254,7 @@ Assume I want to create a JsonTextW in the structure like this.
     
 ```    
 
-## Memory Management
+# Memory Management
 
 _All the sample code in this section is also available in main.cpp._
 
@@ -304,7 +304,8 @@ Note: the code above is just to demostrate how memory management works. You can 
 
 ```
 
-## Known issues and TODO
+# Known issues and TODO
 
 1. *JsonW* does NOT support the big number. The Json contains number that greater than INT_MAX/HUGE_VAL or less than INT_MIN/-HUGE_VAL is treated as invalid during creation.
 2. *JsonW* does NOT handle the memory overflow when reading or creating super massive Json object. If you try to feed several terabytes data in it, the behavior is undefined.
+
