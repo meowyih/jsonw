@@ -6,8 +6,9 @@ Yih Horng|yhorng75@gmail.com
 
 # About JsonW tool
 
-*JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project. 
-There are plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue 1) it is fun and 2) I'm tired to read other people's license note. :grinning:
+*JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project.
+
+I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue 1) it is fun and 2) I'm tired to read other people's license note. :grinning:
 
 # About Json 
 
