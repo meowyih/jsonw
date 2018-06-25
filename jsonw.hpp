@@ -233,7 +233,9 @@ public:
     // create JsonTextW from wistream, ucs string or utf8 string
     JsonTextW(std::wistream& ins);
     JsonTextW(const wchar_t* wstr);
+    JsonTextW(const wchar_t* uscdata, size_t length );
     JsonTextW(const char* utf8str);
+    JsonTextW(const char* utf8data, size_t length );
 
     // create JsonTextW from value, object or array.
     JsonTextW(JsonValueW* value);

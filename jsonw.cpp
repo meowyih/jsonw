@@ -1206,8 +1206,42 @@ octillion::JsonTextW::JsonTextW(const wchar_t* wstr )
     init(wins);
 }
 
+octillion::JsonTextW::JsonTextW(const wchar_t* ucsdata, size_t size )
+{
+    // convert to std::wstring
+    std::wstring wstr( ucsdata, size );
+    
+    // convert to wstringbuf
+    std::wstringbuf strBuf(wstr);
+    
+    // convert to wistream
+    std::wistream wins(&strBuf);
+    
+    // constructor with wistream parameter 
+    init(wins);
+}
+
 octillion::JsonTextW::JsonTextW(const char* utf8str)
 {
+    // convert to wstring
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    std::wstring wstr = conv.from_bytes(utf8str);
+
+    // convert to wstringbuf
+    std::wstringbuf strBuf(wstr.data());
+
+    // convert to wistream
+    std::wistream wins(&strBuf);
+    
+    // constructor with std::wstring parameter
+    init(wins);
+}
+
+octillion::JsonTextW::JsonTextW(const char* utf8data, size_t length )
+{
+    // convert to std::string
+    std::string utf8str( utf8data, length );
+    
     // convert to wstring
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     std::wstring wstr = conv.from_bytes(utf8str);
