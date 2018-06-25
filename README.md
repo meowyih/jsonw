@@ -8,7 +8,7 @@ Yih Horng|yhorng75@gmail.com
 
 *JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project.
 
-I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue it is fun and I'm tired to read other people's license note. :grinning:
+I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue it is fun and I'm too lazy to to read other people's license note. :grinning:
 
 # About Json 
 
@@ -22,7 +22,7 @@ Here are somethings that *JsonW* user needs to know.
 > JSON-text = ws value ws
 
 2. A _value_ (JsonValueW) is either a number, a string, a boolean, a null, an _object_ (JsonObjectW) or an _array_ (JsonArrayW).
-3. A _object_ (JsonObjectW) is a set of name/_value_ (JsonValueW) pair. 
+3. An _object_ (JsonObjectW) is a set of name/_value_ (JsonValueW) pair. 
 4. An _array_ (JsonArrayW) is a collection of _value_ (JsonValueW).
 
 # About character set
@@ -239,7 +239,7 @@ An _object_ contains multiple key-value pairs. Here is an example shows how to g
 
 ## Work with array
 
-An _array_ contains multiple values. Here is an example shows how to access all _values_ inside an _array.
+An _array_ contains multiple values. Here is an example shows how to access all _values_ inside an _array_.
 
 ``` c++
     
