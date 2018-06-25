@@ -3,9 +3,6 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <sstream>
-#include <locale>
-#include <codecvt>
 #include <vector>
 
 #include "jsonw.hpp"
