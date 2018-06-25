@@ -4,11 +4,19 @@ Author   | Email
 ---------|------------------
 Yih Horng|yhorng75@gmail.com
 
+<<<<<<< HEAD
 # About JsonW
 
 *JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project.
 
 I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue it is fun and I'm tired to read other people's license note. :grinning:
+=======
+# About JsonW tool
+
+*JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project.
+
+I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue 1) it is fun and 2) I'm tired to read other people's license note. :grinning:
+>>>>>>> origin/master
 
 # About Json 
 
@@ -134,8 +142,11 @@ Here is how to do it.
 ```
 
 ## Work with value
+<<<<<<< HEAD
 
 According to the [RFC7159](https://www.rfc-editor.org/info/rfc7159) json text contains exactly one _value_. This example shows how to extract that JsonValueW from JsonTextW. Then handle the data in it based on the different type of value.
+=======
+>>>>>>> origin/master
 
 ``` c++
 
@@ -185,8 +196,11 @@ According to the [RFC7159](https://www.rfc-editor.org/info/rfc7159) json text co
 ```
 
 ## Work with object
+<<<<<<< HEAD
 
 An _object_ contains multiple key-value pairs. Here is an example shows how to get all keys in _object_, as well as retrieving the _value_ via the key. 
+=======
+>>>>>>> origin/master
 
 ``` c++
 
@@ -238,8 +252,11 @@ An _object_ contains multiple key-value pairs. Here is an example shows how to g
 ```
 
 ## Work with array
+<<<<<<< HEAD
 
 An _array_ contains multiple values. Here is an example shows how to access all _values_ inside an _array.
+=======
+>>>>>>> origin/master
 
 ``` c++
     
@@ -318,4 +335,8 @@ Note: the code above is just to demostrate how memory management works. You can 
 
 1. *JsonW* does NOT support the big number. The Json contains number that greater than INT_MAX/HUGE_VAL or less than INT_MIN/-HUGE_VAL is treated as invalid during creation.
 2. *JsonW* does NOT handle the memory overflow when reading or creating super massive Json object. If you try to feed several terabytes data in it, the behavior is undefined.
+<<<<<<< HEAD
 3. *JsonTextW* does NOT support _pretty format_ output yet. When calling _string()_ or _wstring()_, the retrurns data is a single-line text in utf8 or usc encoding.
+=======
+
+>>>>>>> origin/master
