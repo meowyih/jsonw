@@ -1,19 +1,20 @@
-### JsonW - C++ Wide Character Json Tool
+# JsonW - C++ Wide Character Json Tool
 
 Author   | Email
 ---------|------------------
 Yih Horng|yhorng75@gmail.com
 
-## About JsonW tool
+# About JsonW
 
-*JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project. 
-There are plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue 1) it is fun and 2) I'm tired to read other people's license note. :grinning:
+*JsonW* is a *_C++11_* Json R/W tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project.
 
-## About Json 
+I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is becasue it is fun and I'm tired to read other people's license note. :grinning:
+
+# About Json 
 
 General introduction is here: https://www.json.org/
 
-Here is something that *JsonW* caller needs to know.
+Here are somethings that *JsonW* user needs to know.
 
 1. Json text (JsonTextW) is an utf8 encoding text contains a _value_ (JsonValueW).
 
@@ -24,19 +25,19 @@ Here is something that *JsonW* caller needs to know.
 3. A _object_ (JsonObjectW) is a set of name/_value_ (JsonValueW) pair. 
 4. An _array_ (JsonArrayW) is a collection of _value_ (JsonValueW).
 
-## About character set
+# About character set
 
 _wchar_t_ is 2 bytes in Windows and 4 bytes in linux. Since *JsonW* stores text data in _wchar_t_ underlying, *JsonW* supports all characters defined in USC2 in Windows and USC4 in Linux.
 
-## Installation
+# Installation
 
-Make sure the compiler supports C++11 and can find the header file _json.h_ and source file _json.cpp_.
+Make sure the compiler supports C++11 and can find the header file _jsonw.hpp_ and source file _jsonw.cpp_.
 
-## Usage
+# Usage
 
 _All the sample code in this section is also available in main.cpp._
 
-# Read json from utf8 data
+## Read json from utf8 data
 
 ``` c++
 
@@ -53,7 +54,7 @@ _All the sample code in this section is also available in main.cpp._
     
 ```
 
-# Read json from utf8 file
+## Read json from utf8 file
 
 ``` c++
 
@@ -79,30 +80,33 @@ _All the sample code in this section is also available in main.cpp._
     
 ```
 
-# Create json programatically
+## Create json programatically
 
 Assume I want to create a JsonTextW in the structure like this.
 
->
-> {
->     "txt1": "some text1",
->     "num1": 123,
->     "array": 
->     [
->         true,
->         {
->             "txt2": "some text2",
->             "num2": 456
->         }
->     ]
-> }
->
+``` json
+ {
+     "txt1": "some text1",
+     "num1": 123,
+     "array": 
+     [
+         true,
+         {
+             "txt2": "some text2",
+             "num2": 456
+         }
+     ]
+ }
+ 
+```
+
+Here is how to do it.
 
 ``` c++
 
     // create the outer JsonObjectW
     octillion::JsonObjectW* object1 = new octillion::JsonObjectW();
-    object1->add(u8"txt1", "some text1");
+    object1->add(u8"txt1", u8"some text1");
     object1->add(u8"num1", 123);
 
     // create the array
@@ -111,7 +115,7 @@ Assume I want to create a JsonTextW in the structure like this.
 
     // create the JsonObjectW inside array
     octillion::JsonObjectW* object2 = new octillion::JsonObjectW();
-    object2->add(u8"txt2", "some text2");
+    object2->add(u8"txt2", u8"some text2");
     object2->add(u8"num2", 456);
     array->add(object2);
 
@@ -129,7 +133,9 @@ Assume I want to create a JsonTextW in the structure like this.
 
 ```
 
-# Work with value
+## Work with value
+
+According to the [RFC7159](https://www.rfc-editor.org/info/rfc7159) json text contains exactly one _value_. This example shows how to extract that JsonValueW from JsonTextW. Then handle the data in it based on the different type of value.
 
 ``` c++
 
@@ -178,7 +184,9 @@ Assume I want to create a JsonTextW in the structure like this.
     
 ```
 
-# Work with object
+## Work with object
+
+An _object_ contains multiple key-value pairs. Here is an example shows how to get all keys in _object_, as well as retrieving the _value_ via the key. 
 
 ``` c++
 
@@ -229,7 +237,9 @@ Assume I want to create a JsonTextW in the structure like this.
     
 ```
 
-# Work with array
+## Work with array
+
+An _array_ contains multiple values. Here is an example shows how to access all _values_ inside an _array.
 
 ``` c++
     
@@ -254,7 +264,7 @@ Assume I want to create a JsonTextW in the structure like this.
     
 ```    
 
-## Memory Management
+# Memory Management
 
 _All the sample code in this section is also available in main.cpp._
 
@@ -304,7 +314,8 @@ Note: the code above is just to demostrate how memory management works. You can 
 
 ```
 
-## Known issues and TODO
+# Known issues and TODO
 
 1. *JsonW* does NOT support the big number. The Json contains number that greater than INT_MAX/HUGE_VAL or less than INT_MIN/-HUGE_VAL is treated as invalid during creation.
 2. *JsonW* does NOT handle the memory overflow when reading or creating super massive Json object. If you try to feed several terabytes data in it, the behavior is undefined.
+3. *JsonTextW* does NOT support _pretty format_ output yet. When calling _string()_ or _wstring()_, the retrurns data is a single-line text in utf8 or usc encoding.

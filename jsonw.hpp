@@ -17,23 +17,25 @@ namespace octillion
     class JsonTextW;
 }
 
+// JsonTokenW presents a token in json data. It also has static member that can parse the json from text to token. 
+// However, JsonW caller does not need to access this class in almost all the cases. See README.md for detail.
 class octillion::JsonTokenW
 {
 public:
     enum class Type
     {
-        NumberInt = 1,
-        NumberFrac = 2,
-        String = 3,
-        LeftCurlyBracket = 4,
-        RightCurlyBracket = 5,
-        LeftSquareBracket = 6,
-        RightSquareBracket = 7,
-        Colon = 8,
-        Comma = 9,
-        Boolean = 10,
-        Null = 11,
-        Bad = 12
+        NumberInt,
+        NumberFrac,
+        String,
+        LeftCurlyBracket,
+        RightCurlyBracket,
+        LeftSquareBracket,
+        RightSquareBracket,
+        Colon,
+        Comma,
+        Boolean,
+        Null,
+        Bad
     };
 
 public:
@@ -63,6 +65,9 @@ private:
     bool boolean_;
 };
 
+// JsonValueW represents a value in json. This class provide many different 
+// constructor to create different type of value, includes number, boolean, null,
+// string, json object and json array.
 class octillion::JsonValueW
 {
 public:
@@ -78,23 +83,30 @@ public:
         Bad
     };
 public:
+
+    // constructors for number, boolean, string, null, json object and json array
     JsonValueW(int integer) { type_ = Type::NumberInt; integer_ = integer;  }
     JsonValueW(double frac) { type_ = Type::NumberFrac; frac_ = frac; }
     JsonValueW(bool boolean) { type_ = Type::Boolean; boolean_ = boolean; }
     JsonValueW(std::wstring wstring) { type_ = Type::String; wstring_ = wstring; }
-    JsonValueW(wchar_t* wstring) { type_ = Type::String; wstring_ = wstring; }
+    JsonValueW(const wchar_t* wstring) { type_ = Type::String; wstring_ = wstring; }
     JsonValueW(std::string string);
-    JsonValueW(char* string);
+    JsonValueW(const char* string);
     JsonValueW(JsonObjectW* object) { type_ = Type::JsonObject; object_ = object; }
     JsonValueW(JsonArrayW* array) { type_ = Type::JsonArray; array_ = array; }
-    JsonValueW() { type_ = Type::Null; }
-
-    JsonValueW(std::queue<JsonTokenW>& queue);
+    JsonValueW() { type_ = Type::Null; } // null value
+    
+    // destructor
     ~JsonValueW();
-
+    
+    // special constructor that can create value from a sequence of token
+    JsonValueW(std::queue<JsonTokenW>& queue);
+    
+    // members for checking type and if value is valid
     Type type() { return type_; }
     bool valid() { return (type_ != Type::Bad); }
 
+    // accessor members
     JsonObjectW* object() { return object_; }
     JsonArrayW* array() { return array_; }
     int integer() { return integer_; }
@@ -117,6 +129,8 @@ private:
     std::wstring wstring_;
 };
 
+// JsonObjectW represents an object in json, it was designed to contains multple
+// key/value pairs. 
 class octillion::JsonObjectW
 {
 public:
@@ -124,32 +138,39 @@ public:
     JsonObjectW(std::queue<JsonTokenW>& queue);
     ~JsonObjectW();
 
+    // members to add a key/value pairs into object. The key type is ucs encoding string.
     bool add(std::wstring key, JsonValueW* value);
     bool add(std::wstring key, JsonArrayW* array);
     bool add(std::wstring key, JsonObjectW* object);
     bool add(std::wstring key, std::wstring wstring );
-    bool add(std::wstring key, wchar_t* wstring);
+    bool add(std::wstring key, const wchar_t* wstring);
     bool add(std::wstring key, int integer);
     bool add(std::wstring key, double frac);
     bool add(std::wstring key, bool boolean);
-    bool add(std::wstring key);
+    bool add(std::wstring key); // null value
     
+    // members to add a key/value pairs into object. The key type is utf8 encoding string.
     bool add(std::string key, JsonValueW* value);
     bool add(std::string key, JsonArrayW* array);
     bool add(std::string key, JsonObjectW* object);
     bool add(std::string key, std::string string );
-    bool add(std::string key, char* string);
+    bool add(std::string key, const char* string);
     bool add(std::string key, int integer);
     bool add(std::string key, double frac);
     bool add(std::string key, bool boolean);
-    bool add(std::string key);
+    bool add(std::string key); // null value
     
+    // check if object is valid
     bool valid() { return valid_; };
 
+    // return the number of key/value pairs in the object
     size_t size() { return wvalues_.size(); }
+    
+    // return all available keys in either ucs or utf8 enconding
     std::vector<std::wstring> wkeys();
     std::vector<std::string> keys();
 
+    // access the value via ucs or utf8 key, the return data is NULL if key does not exist
     JsonValueW* find( std::wstring wkey );
     JsonValueW* find( std::string key );
 
@@ -162,6 +183,8 @@ private:
     std::map<std::wstring, JsonValueW*> wvalues_;
 };
 
+
+// JsonArrayW represents an array in json. It was designed to contains multiple values.
 class octillion::JsonArrayW
 {
 public:
@@ -169,18 +192,26 @@ public:
     JsonArrayW(std::queue<JsonTokenW>& queue);
     ~JsonArrayW();
 
+    // add a value with different type
     bool add(JsonValueW* value);
     bool add(JsonArrayW* array);
     bool add(JsonObjectW* object);
     bool add(std::string string);
-    bool add(char* string);
+    bool add(const char* string);
+    bool add(std::wstring wstring);
+    bool add(const wchar_t* wstring);
     bool add(int integer);
     bool add(double frac);
     bool add(bool boolean);
-    bool add();
+    bool add(); // add null value
+    
+    // check if array is valid
     bool valid() { return valid_; };
 
+    // return the number of values in array
     size_t size() { return values_.size(); }
+    
+    // accessor member 
     JsonValueW* at(size_t idx) { return values_.at(idx); }
 
     friend JsonObjectW;
@@ -192,21 +223,33 @@ private:
     std::vector<JsonValueW*> values_;
 };
 
+// JsonTextW represents a json text defined in RFC7159, which contains exactly one value.
+// This class provide members to read json data from wistream, ucs data and utf8 data.
+// This class also provide members to create json from value, object or array since
+// An object or an array is also a value in json standard.
 class octillion::JsonTextW
 {
 public:
+    // create JsonTextW from wistream, ucs string or utf8 string
     JsonTextW(std::wistream& ins);
-    JsonTextW(wchar_t* wstr);
-    JsonTextW(char* utf8str);
-    
+    JsonTextW(const wchar_t* wstr);
+    JsonTextW(const char* utf8str);
+
+    // create JsonTextW from value, object or array.
     JsonTextW(JsonValueW* value);
     JsonTextW(JsonObjectW* object);
     JsonTextW(JsonArrayW* array);
-    ~JsonTextW();
-    bool valid() { return valid_; };
     
+    // destructor
+    ~JsonTextW();
+    
+    // check if json data is valid
+    bool valid() { return valid_; };
+
+    // return the single value in JsonTextW    
     JsonValueW* value() { return value_; }
 
+    // return the json text in ucs or utf8, don't forget the standard json must be utf8 enconding
     std::wstring wstring();
     std::string string();
 

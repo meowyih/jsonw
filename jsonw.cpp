@@ -5,10 +5,12 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <cmath>
+#include <locale>
 
 #include <codecvt>
 
-#include "json.h"
+#include "jsonw.hpp"
 
 // global operator overriding
 namespace octillion
@@ -637,7 +639,7 @@ octillion::JsonValueW::JsonValueW(std::string string)
     wstring_ = conv.from_bytes(string.data());
 }
 
-octillion::JsonValueW::JsonValueW(char* string)
+octillion::JsonValueW::JsonValueW(const char* string)
 {
     type_ = Type::String;
 
@@ -760,7 +762,7 @@ bool octillion::JsonObjectW::add(std::string key, std::string string)
     return add( wkey, wstring );
 }
 
-bool octillion::JsonObjectW::add(std::wstring key, wchar_t* wstring)
+bool octillion::JsonObjectW::add(std::wstring key, const wchar_t* wstring)
 {
     bool ret;
     JsonValueW* value = new JsonValueW(wstring);
@@ -774,7 +776,7 @@ bool octillion::JsonObjectW::add(std::wstring key, wchar_t* wstring)
     return ret;
 }
 
-bool octillion::JsonObjectW::add(std::string key, char* string)
+bool octillion::JsonObjectW::add(std::string key, const char* string)
 {
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
     std::wstring wkey = conv.from_bytes(key.data());
@@ -1120,9 +1122,19 @@ bool octillion::JsonArrayW::add(std::string string)
     return add(new JsonValueW(string));
 }
 
-bool octillion::JsonArrayW::add(char* string)
+bool octillion::JsonArrayW::add(const char* string)
 {
     return add(new JsonValueW(string));
+}
+
+bool octillion::JsonArrayW::add(std::wstring wstring)
+{
+    return add(new JsonValueW(wstring));
+}
+
+bool octillion::JsonArrayW::add(const wchar_t* wstring)
+{
+    return add(new JsonValueW(wstring));
 }
 
 bool octillion::JsonArrayW::add(int integer)
@@ -1182,7 +1194,7 @@ octillion::JsonTextW::JsonTextW(std::wistream& ins)
     init(ins);
 }
 
-octillion::JsonTextW::JsonTextW(wchar_t* wstr )
+octillion::JsonTextW::JsonTextW(const wchar_t* wstr )
 {
     // convert to wstringbuf
     std::wstringbuf strBuf(wstr);
@@ -1194,7 +1206,7 @@ octillion::JsonTextW::JsonTextW(wchar_t* wstr )
     init(wins);
 }
 
-octillion::JsonTextW::JsonTextW(char* utf8str)
+octillion::JsonTextW::JsonTextW(const char* utf8str)
 {
     // convert to wstring
     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
