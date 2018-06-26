@@ -48,15 +48,15 @@ void show_how_memory_management_works_simple();
 
 int main()
 {
-    // read_json_from_utf8_data();
-    // read_json_from_usc_data();
-    // read_json_from_utf8_file();
-    // create_json_programatically();
-    // how_to_work_with_value();
-    // how_to_work_with_object();
-    // how_to_work_with_array();
-    // show_how_memory_management_works();
-    // show_how_memory_management_works_simple();
+    read_json_from_utf8_data();
+    read_json_from_usc_data();
+    read_json_from_utf8_file();
+    create_json_programatically();
+    how_to_work_with_value();
+    how_to_work_with_object();
+    how_to_work_with_array();
+    show_how_memory_management_works();
+    show_how_memory_management_works_simple();
     return 0;
 }
 

@@ -1,5 +1,5 @@
-#ifndef OCTILLION_JSON_HEADER
-#define OCTILLION_JSON_HEADER
+#ifndef OCTILLION_JSONW_HEADER
+#define OCTILLION_JSONW_HEADER
 
 #include <iostream>
 #include <queue>
@@ -58,11 +58,11 @@ private:
     static bool findnext(std::wistream& ins);    
 
 private:
-    enum Type type_;
-    int integer_;
-    double frac_;
+    enum Type type_ = Type::Bad;
+    int integer_ = 0;
+    double frac_ = 0.0;
     std::wstring wstring_;
-    bool boolean_;
+    bool boolean_ = true;
 };
 
 // JsonValueW represents a value in json. This class provide many different 
@@ -120,12 +120,12 @@ public:
     friend JsonTextW;
 
 private:
-    Type type_;
-    JsonObjectW* object_;
-    JsonArrayW* array_;
-    int integer_;
-    double frac_;
-    bool boolean_;
+    Type type_ = Type::Bad;
+    JsonObjectW* object_ = NULL;
+    JsonArrayW* array_ = NULL;
+    int integer_ = 0;
+    double frac_ = 0.0;
+    bool boolean_ = true;
     std::wstring wstring_;
 };
 
@@ -179,7 +179,7 @@ public:
     friend JsonTextW;
 
 private:
-    bool valid_;
+    bool valid_ = false;
     std::map<std::wstring, JsonValueW*> wvalues_;
 };
 
@@ -219,7 +219,7 @@ public:
     friend JsonTextW;
 
 private:
-    bool valid_;
+    bool valid_ = false;
     std::vector<JsonValueW*> values_;
 };
 
@@ -264,8 +264,8 @@ private:
     static std::wstring wstring(const JsonArrayW* const array);
 
 private:
-    bool valid_;
-    JsonValueW* value_;
+    bool valid_ = false;
+    JsonValueW* value_ = NULL;
 };
 
-#endif // OCTILLION_JSON_HEADER
+#endif // OCTILLION_JSONW_HEADER
