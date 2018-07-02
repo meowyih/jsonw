@@ -1173,6 +1173,9 @@ void octillion::JsonTextW::init(std::wistream& ins)
 
     value_ = NULL;
 
+    // new std::codecvt_utf8<wchar_t> 
+    // The constructed locale object takes over responsibility for deleting this facet object.
+    // http://www.cplusplus.com/reference/locale/locale/locale/
     ins.imbue(std::locale(ins.getloc(), new std::codecvt_utf8<wchar_t>));
     octillion::JsonTokenW::parse(ins, tokens);
     octillion::JsonValueW* value = new octillion::JsonValueW(tokens);
