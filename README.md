@@ -58,24 +58,24 @@ _All the sample code in this section is also available in main.cpp._
 
 ``` c++
 
-    // 'sample.json' is a utf-8 encoded file without BOM
-    std::string jsonfile = "sample.json";
-    
-    // initialize JsonTextW object using wistream (wifstream)
-    std::wifstream wfin(jsonfile);
-    
-    if (!wfin.good())
+    // 'sample.json' must utf-8 format without BOM
+    std::string jsonfile = "F:\\VSProject\\JsonParser\\Debug\\sample.json";
+
+    // initialize JsonTextW object using ifstream
+    std::ifstream fin(jsonfile);
+
+    if (!fin.good())
     {
-        std::cout << "bad ifstream" << std::endl;
+        std::wcout << L"bad ifstream" << std::endl;
         return;
     }
-    
-    // initialize JsonTextW object using wfin
-    octillion::JsonTextW* json = new octillion::JsonTextW(wfin);
-    
+
+    // initialize JsonTextW object using fin
+    octillion::JsonTextW* json = new octillion::JsonTextW(fin);
+
     // json in utf8
-    std::cout << json->string() << std::endl; 
-    
+    std::cout << json->string() << std::endl;
+
     delete json;
     
 ```

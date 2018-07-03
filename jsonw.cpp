@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <fstream>
 #include <sstream>
 #include <queue>
 #include <string>
@@ -1173,9 +1174,6 @@ void octillion::JsonTextW::init(std::wistream& ins)
 
     value_ = NULL;
 
-    // new std::codecvt_utf8<wchar_t> 
-    // The constructed locale object takes over responsibility for deleting this facet object.
-    // http://www.cplusplus.com/reference/locale/locale/locale/
     ins.imbue(std::locale(ins.getloc(), new std::codecvt_utf8<wchar_t>));
     octillion::JsonTokenW::parse(ins, tokens);
     octillion::JsonValueW* value = new octillion::JsonValueW(tokens);
@@ -1195,6 +1193,32 @@ void octillion::JsonTextW::init(std::wistream& ins)
 octillion::JsonTextW::JsonTextW(std::wistream& ins)
 {
     init(ins);
+}
+
+octillion::JsonTextW::JsonTextW(std::ifstream& fin)
+{
+    if (!fin.good())
+    {
+        return;
+    }
+
+    // convert to std::string
+    std::string utf8str(
+        (std::istreambuf_iterator<char>(fin)),
+        (std::istreambuf_iterator<char>()));
+
+    // convert to wstring
+    std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+    std::wstring wstr = conv.from_bytes(utf8str);
+
+    // convert to wstringbuf
+    std::wstringbuf strBuf(wstr.data());
+
+    // convert to wistream
+    std::wistream wins(&strBuf);
+
+    // constructor with std::wstring parameter
+    init(wins);
 }
 
 octillion::JsonTextW::JsonTextW(const wchar_t* wstr )

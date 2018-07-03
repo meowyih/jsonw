@@ -2,6 +2,7 @@
 #define OCTILLION_JSONW_HEADER
 
 #include <iostream>
+#include <fstream>
 #include <queue>
 #include <string>
 #include <map>
@@ -232,6 +233,7 @@ class octillion::JsonTextW
 public:
     // create JsonTextW from wistream, ucs string or utf8 string
     JsonTextW(std::wistream& ins);
+    JsonTextW(std::ifstream& fin);
     JsonTextW(const wchar_t* wstr);
     JsonTextW(const wchar_t* uscdata, size_t length );
     JsonTextW(const char* utf8str);
