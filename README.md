@@ -270,7 +270,7 @@ An _array_ contains multiple values. Here is an example shows how to access all 
     
 ```    
 
-# Avoiding deep copy
+# Avoiding deep copying
 
 Consider the code below.
 
@@ -330,6 +330,10 @@ using namespace octillion;
     delete p_json;
 
 ```
+
+# Memory leak detection
+
+In _jsonw.hpp_, line#19, there is a macro named OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION. If you enable it, JsonW will keep track of all the new/delete function call for JsonW class. Then show the memory leak report by calling octillion::JsonW::memory_leak_detect_result() static function. There is a mutex lock during the detection. Do not enable this macro unless you really want to check the memory leak.
 
 # Known issues and TODO
 
