@@ -16,7 +16,7 @@
 #include <codecvt>   // ucs utf8 convertor
 
 // keep track of all the JsonW creation (new) and deletion (delete) 
-#define OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
+// #define OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 #ifdef  OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 #include <cstdlib> // c style malloc and free for memory leak detection
 #include <set>     // store addresses

@@ -1,0 +1,24 @@
+{
+    "monster": {"data":[1,2,3]},
+	"MULTIPLEARRAY":[ [1], [2,3], [4,5,6]],
+	"map":
+	{
+		"id":12441,
+		"name":"midguard",
+		"xoffset":"1000",
+		"yoffset":"1000",
+		"zoffset":"1000",
+		"rooms":
+		[
+			{
+				"position":[4210,1233,1245],
+				"description":"this is a room",
+				"exits":
+				[
+					{"n":[12441,0,0,1]},
+					{"e":[12441,0,1,0]}
+				],				
+			}
+		]
+	}
+}
