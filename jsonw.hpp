@@ -20,7 +20,7 @@
 #ifdef  OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 #include <cstdlib> // c style malloc and free for memory leak detection
 #include <set>     // store addresses
-#include <mutex>   // lock during address table set io
+#include <mutex>   // lock during writing address table
 #endif 
 
 namespace octillion
@@ -689,19 +689,19 @@ public:
         // constructor with std::wstring parameter
         init(wins);
     }
-
-    explicit JsonW(std::queue<JsonTokenW>& tokens)
-    {
-        parse(tokens);
-    }
-
+    
     ~JsonW()
     {
         clean();
     }
 
-public:
-    // public member functions
+private:    
+    explicit JsonW(std::queue<JsonTokenW>& tokens)
+    {
+        parse(tokens);
+    }
+    
+private:
     // read json data from a sequence of tokens
     void parse(std::queue<JsonTokenW>& tokens)
     {
@@ -823,7 +823,7 @@ public:
         }
     }
 
-    int_fast64_t integer() const { return integer_; }
+    long long integer() const { return integer_; }
     long double frac() const { return frac_; }    
     std::wstring wstr() const { return wstring_; }
     std::string str() const
@@ -884,6 +884,29 @@ public:
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
         std::wstring wkey = conv.from_bytes(key.data());
         return get(wkey);
+    }
+    
+    // delete a name-pair value inside json object by the name
+    // return false if no such value
+    bool erase(std::wstring wkey)
+    {
+        auto it = jobject_.find(wkey);
+        if (it == jobject_.end())
+        {
+            return false;
+        }
+        
+        delete it->second;
+        jobject_.erase(it);
+        return true;
+    }
+    
+    bool erase(std::string key)
+    {
+        // convert to wstring
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        std::wstring wkey = conv.from_bytes(key.data());
+        return erase(wkey);
     }
 
     // set json value using specific key, return false
@@ -955,6 +978,26 @@ public:
         }
         
         valid_ = true;        
+        return true;
+    }
+    
+    // delete a value inside json array by index, 
+    // return false if no such value.
+    bool erase(size_t idx)
+    {
+        if ( type_ != ARRAY )
+        {
+            return false;
+        }
+
+        if ( size() <= idx )
+        {
+            return false;
+        }
+        
+        delete jarray_.at( idx );
+        jarray_.erase( jarray_.begin() + idx );
+        
         return true;
     }
 
@@ -1571,7 +1614,7 @@ private:
     int type_ = NULLVALUE;
     bool valid_ = false;
 
-    int_fast64_t integer_ = 0;
+    long long integer_ = 0;
     long double frac_ = 0.0;
     std::wstring wstring_;
     bool boolean_ = true;

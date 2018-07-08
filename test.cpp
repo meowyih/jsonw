@@ -256,6 +256,10 @@ void how_to_work_with_object()
         std::string value = jobject[key].str();
         std::cout << "key-" << i << ":" << key << " value:" << value << std::endl;
     }
+
+    // earse some value and see the result
+    jobject.erase(u8"last");
+    std::cout << jobject << std::endl;
 }
 
 void how_to_work_with_array()
@@ -270,6 +274,11 @@ void how_to_work_with_array()
     {
         std::cout << "item-" << i << ":" << jarray[i].integer() << std::endl;
     }
+
+    // erase some value and see the result
+    jarray.erase(0); // be careful, after erase, the size of jarray became 3
+    jarray.erase(1); // be careful, after erase, the size of jarray became 2
+    std::cout << jarray << std::endl;
 }
 
 // memory management - avoiding deep copy to save memory

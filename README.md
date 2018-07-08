@@ -22,7 +22,7 @@ Here are somethings that *JsonW* user needs to know.
 > JSON-text = ws value ws
 
 2. A _value_ is either a number, a string, a boolean, a null, an _object_  or an _array_.
-3. An _object_ is a set of name/_value_ pair. 
+3. An _object_ is a set of _name/_value_ pair. 
 4. An _array_ is a collection of _value_.
 
 # About character set
@@ -31,11 +31,11 @@ _wchar_t_ is 2 bytes in Windows and 4 bytes in linux. Since *JsonW* stores text 
 
 # Installation
 
-Make sure the compiler supports C++11 and include find the header file _jsonw.hpp_.
+Make sure the compiler supports C++11 and include the header file _jsonw.hpp_.
 
 # Usage
 
-_All the sample code in this section is also available in test.cpp._
+All the sample codes in this section area available in _test.cpp_.
 
 ## Read json from utf8 data
 
@@ -106,7 +106,7 @@ using namespace octillion;
     // create two JsonW object
     JsonW jobject1, jobject2;
     
-    jobject1[u8"txt1"] = "some text1";
+    jobject1[u8"txt1"] = u8"some text1";
     jobject1[u8"num1"] = 123;
 
     jobject2[u8"null"]; // default JsonW value is NULL
@@ -149,7 +149,7 @@ using namespace octillion;
     jvalue = (long double)4.56;
 
     // jvalue is a string
-    jvalue = "utf8 c-string";
+    jvalue = u8"utf8 c-string";
     jvalue = L"ucs c-string";
     jvalue = std::string("utf8 string");
     jvalue = std::wstring(L"utf8 string");
@@ -206,7 +206,7 @@ using namespace octillion;
     std::wstring json_ucs = jvalue.wtext();
 
     // overloading ostream << operator
-    std::cout << "json format:" << jvalue << std::endl;
+    std::cout << u8"json format:" << jvalue << std::endl;
     
 ```
 
@@ -252,6 +252,10 @@ using namespace octillion;
         std::cout << "key-" << i << ":" << key << " value:" << value << std::endl;
     }
     
+    // earse some value and see the result
+    jobject.erase(u8"last");
+    std::cout << jobject << std::endl;
+    
 ```
 
 ## Work with array
@@ -271,6 +275,11 @@ An _array_ contains multiple values. Here is an example shows how to access all 
         std::cout << "item-" << i << ":" << jarray[i].integer() << std::endl;
     }
     
+    // erase some value and see the result
+    jarray.erase(0); // be careful, after erase, the size of jarray became 3
+    jarray.erase(1); // be careful, after erase, the size of jarray became 2
+    std::cout << jarray << std::endl;
+    
 ```    
 
 # Avoiding deep copying
@@ -283,13 +292,13 @@ using namespace octillion;
     JsonW json, jobject, jarray;
     
     jarray[1] = 10; // JsonW automatically assign NULL to jarray[0]
-    jobject["data"] = "data"; 
+    jobject[u8"data"] = u8"data"; 
 
     // deep copy jarray into jobject
-    jobject["array"] = jarray;
+    jobject[u8"array"] = jarray;
 
     // deep copy jobject (as well as jarray) into json
-    json["object"] = jobject;
+    json[u8"object"] = jobject;
 
     std::cout << "json:" << json << std::endl;
 
@@ -305,15 +314,15 @@ using namespace octillion;
     p_jarray = new JsonW();
 
     // null is a standard json string, see README.md for detail
-    p_jarray->add(new JsonW("null"));
+    p_jarray->add(new JsonW(u8"null"));
 
     // 10 is a standard json string, see README.md for detail
-    p_jarray->add(new JsonW("10"));
+    p_jarray->add(new JsonW(u8"10"));
 
     p_object = new JsonW();
 
     // "data" is a standard json string, see README.md for detail
-    p_object->add("data", new JsonW("\"data\"")); 
+    p_object->add(u8"data", new JsonW(u8"\"data\"")); 
 
     // assign p_jarray into p_object, it is not deep copy.
     // p_object just copy the address of p_jarray
@@ -330,6 +339,145 @@ using namespace octillion;
     // when delete the p_json, all the JsonW objects in it
     // would be deleted, includes p_jobject and p_jarray.
     delete p_json;
+
+```
+
+# API Reference
+
+## Constructor and Destructor
+
+Caller can always call *valid()* to check if JsonW successcully constructed. Here are all public constructors.
+
++ default constructor
+  default type for JsonW is always NULLVALUE
++ copy constructor
+  Deep copy another JsonW
++ construct by utf8 file input stream 
++ construct by utf8 string
+  Caller can use std::string or const char* to feed in the utf8 data
++ construct by ucs string (std::wstring / const wchar_t*)
++ destrcutor
+
+``` c++
+
+    // Construct a NULLVALUE json
+    JsonW();
+    
+    // Construct a json by deep copy another json
+    explicit JsonW(const JsonW& rhs);
+    
+    // Construct a json from an text file encoded by utf8
+    explicit JsonW(std::ifstream& fin);
+    
+    // Construct a json directly from c-ctyle utf8 string
+    explicit JsonW(const char* utf8str);
+    
+    // Construct a json directly from utf8 string with length
+    JsonW(const char* utf8data, size_t length);
+    
+    // Construct a json directly from c-ctyle ucs string
+    explicit JsonW(const wchar_t* wstr);
+    
+    // Construct a json directly from ucs string with length
+    JsonW(const wchar_t* ucsdata, size_t size);    
+    
+    // destructor
+    ~JsonW();
+
+```
+
+## Simple Data Accessor
+
+``` c++
+
+    // check if json is valid
+    bool valid() const;
+    
+    // get type of jsonw, possible types are:
+    // JsonW::OBJECT
+    // JsonW::ARRAY
+    // JsonW::INTEGER
+    // JsonW::FLOAT
+    // JsonW::STRING
+    // JsonW::BOOLEAN
+    // JsonW::NULLVALUE
+    // JsonW::BAD
+    int type() const;
+
+    // get the integer value if type is INTEGER
+    long long integer() const;
+    
+    // get the floating value if type is FLOAT
+    long double frac() const;
+    
+    // get the string value in ucs encoding if type is STRING
+    std::wstring wstr() const;
+    
+    // get the string value in utf8 encoding if type is STRING
+    std::string str() const;
+    
+    // get the boolean value if type is BOOLEAN
+    bool boolean() const;
+    
+    // get the number of data in this json value
+    // for INTEGER, FLOAT, STRING and BOOLEAN, return 1
+    // for ARRAY, return the number of values inside it
+    // for OBJECT, return the number of name-value pairs inside it
+    // others return 0
+    size_t size() const;
+
+```
+
+## Object Type Accessor
+
+``` c++
+    
+    // store all available keys in either ucs or utf8 enconding in vector
+    void wkeys(std::vector<std::wstring>& keys) const;
+    void keys(std::vector<std::string>& keys) const;
+    
+    // get the pointer of json object via specific key, return NULL if
+    // no such entry or 'this' is not an json object
+    // different from assignment operator using deep copy (for 
+    // example, 'JsonW jvalue = jobject["key"]'),
+    // the object returned from get() is the actual object stored inside
+    // 'this'. See 'Avoiding deep copying' section for detail.
+    JsonW* get(const std::wstring& wkey) const;
+    JsonW* get(const std::string& key) const;
+    
+    // add a name-pair value into json object
+    // after adding the jvalue, 'this' will take care of the
+    // memory releasing inside its destructor.
+    bool add(std::wstring wkey, JsonW* jvalue);
+    bool add(std::string key, JsonW* jvalue);
+    
+    // delete a name-pair value inside json object by the name
+    // return false if no such value
+    bool erase(std::wstring wkey);
+    bool erase(std::string key);
+
+```
+
+## Array Type Accessor
+
+``` c++
+
+    // get the pointer of json array via index, return NULL if
+    // no such entry or 'this' is not an json array
+    // different from assignment operator using deep copy (for 
+    // example, 'JsonW jvalue = jarray[3]'),
+    // the object returned from get() is the actual object stored inside
+    // 'this'. See 'Avoiding deep copying' section for detail.
+    JsonW* get(size_t idx) const;
+    
+    // add a value into json array
+    // after adding the jvalue, 'this' will take care of the
+    // memory releasing inside its destructor.
+    bool add(JsonW* junit)
+    
+    // delete a value inside json array by index, 
+    // return false if no such value
+    bool erase(size_t idx);
 
 ```
 
