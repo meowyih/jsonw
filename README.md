@@ -8,7 +8,7 @@ Yih Horng|yhorng75@gmail.com
 
 *JsonW* is a *_C++11_* single header Json tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project. 
 
-I know there are already plenty of C++ Json libraries out there. But it is my habit to reinvented the wheel. :boom:
+I know there are already plenty of C++ Json libraries out there. It is my habit to reinvented the wheel. :boom:
 
 # About Json 
 
@@ -428,7 +428,7 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
 
 ```
 
-## Object Type Accessor
+## Json Object Accessor
 
 ``` c++
     
@@ -458,7 +458,7 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
 
 ```
 
-## Array Type Accessor
+## Json Array Accessor
 
 ``` c++
 
