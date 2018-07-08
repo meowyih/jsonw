@@ -1290,17 +1290,19 @@ public:
         return *(jobject_.find(wname)->second);
     }
 
-    std::wstring wtext() const
+    // format json data into utf8 text in json standard
+    std::wstring wtext( bool singleline = true ) const
     {
         std::wstringstream wss;
-        wss_junit(wss, *this);
+        wss_jvalue(wss, *this, singleline);
         return wss.str();
     }
 
-    std::string text() const
+    // format json data into ucs text
+    std::string text( bool singleline = true ) const
     {
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-        return conv.to_bytes(wtext());
+        return conv.to_bytes(wtext( singleline ));
     }
 
     friend std::ostream& operator<<(std::ostream& os, const JsonW& rhs)
@@ -1476,84 +1478,309 @@ private:
     }
     
     // private static help function, write value into string buffer in json format 
-    static void wss_junit(std::wstringstream& wss, const JsonW& junit)
+    static std::wstringstream& wss_jvalue(std::wstringstream& wss, const JsonW& jvalue, bool singleline = true, size_t level = 0 )
     {
-        if (junit.valid() == false)
+        if (jvalue.valid() == false)
         {
-            return;
+            return wss;
         }
 
-        switch (junit.type())
+        switch (jvalue.type())
         {
         case JsonW::INTEGER:
-            wss << std::to_wstring(junit.integer());
-            return;
+            wss << std::to_wstring(jvalue.integer());
+            return wss;
         case JsonW::FLOAT:
-            wss << std::to_wstring(junit.frac());
-            return;
+            wss << std::to_wstring(jvalue.frac());
+            return wss;
         case JsonW::BOOLEAN:
-            if (junit.boolean())
+            if (jvalue.boolean())
             {
                 wss << L"true";
+                return wss;
             }
             else
             {
                 wss << L"false";
+                return wss;
             }
-            return;
         case JsonW::NULLVALUE:
             wss << L"null";
-            return;
+            return wss;
         case JsonW::STRING:
-            wss_json_string(wss, junit.wstr());
-            return;
+            return wss_string(wss, jvalue.wstr());
         case JsonW::OBJECT:
         {
-            std::vector<std::wstring> wkeys;
-            junit.wkeys(wkeys);
-
-            wss << L"{";
-
-            for (size_t i = 0; i < wkeys.size(); i++)
+            if ( singleline )
             {
-                wss_json_string(wss, wkeys.at(i)); // name
-                wss << L":";
-
-                wss_junit(wss, *(junit.get(wkeys.at(i))));
-
-                if (i < wkeys.size() - 1)
-                {
-                    wss << L",";
-                }
+                return wss_jobject( wss, jvalue );
             }
-
-            wss << L"}";
-            return;
-        }
+            else
+            {
+                return wss_jobject( wss, jvalue, singleline, level );
+            }
+        }            
         case JsonW::ARRAY:
         {
-            size_t size = junit.size();
-            wss << L"[";
-            for (size_t i = 0; i < size; i++)
+            std::wstringstream wsstmp;
+            wss_jarray( wsstmp, jvalue);
+            std::wstring wstr = wsstmp.str();
+            
+            if ( singleline || wstr.length() <= 20 )
             {
-                wss_junit(wss, *(junit.get(i)));
+                wss << wstr;
+                return wss;
+            }
+            else
+            {
+                return wss_jarray( wss, jvalue, singleline, level );
+            }                     
+        }
+        case JsonW::BAD:
+        default:
+            return wss;
+        }
+    }
+    
+    static std::wstringstream& wss_jobject(std::wstringstream& wss, const JsonW& jobject, 
+        bool singleline = true, size_t level = 0, bool addcomma = false )
+    {
+        std::vector<std::wstring> wkeys;
+        jobject.wkeys(wkeys);
+        size_t level_plus = 0;
+        
+        if ( singleline == false )
+        {            
+            level_plus = level + 1;
+        }
+
+        wss_intent(wss, level) << L"{";
+        
+        if ( singleline == false )
+        {
+            wss << std::endl;
+        }
+
+        for (size_t i = 0; i < wkeys.size(); i++)
+        {
+            bool newline = false;
+            bool comma_in_function = true;
+            
+            wss_intent(wss, level_plus);
+            wss_string(wss, wkeys.at(i)) << L":";
+            
+            // 'name : value'
+            // when we need to add std::endl after ':'
+            // 1. value is json object
+            // 2. value is json array and length + level*4 > 40
+            JsonW* jvalue = jobject.get(wkeys.at(i));
+             
+            if ( singleline == false )
+            {
+                size_t estimate_size = 0;
+                std::wstringstream wsstmp;
+                wss_jvalue(wsstmp, *jvalue);
+                estimate_size = wsstmp.str().length();
+
+                if ( jvalue->type() == JsonW::OBJECT && jvalue->size() > 1 )
+                {
+                    if (jvalue->size() > 1 || estimate_size > 20)
+                    {
+                        newline = true;
+                        wss << std::endl;
+                    }
+                }
+                else if ( jvalue->type() == JsonW::ARRAY )
+                {
+                    bool has_object_array = false;
+
+                    for (size_t j = 0; j < jvalue->size(); j++)
+                    {
+                        if (jvalue->get(j)->type() == JsonW::ARRAY ||
+                            jvalue->get(j)->type() == JsonW::OBJECT)
+                        {
+                            has_object_array = true;
+                        }
+                    }
+
+                    if (has_object_array || wsstmp.str().length() > 20 )
+                    {
+                        newline = true;
+                        wss << std::endl;
+                    }
+                }             
+            }
+            
+            if ( newline == false )
+            {
+                if (i < wkeys.size() - 1)
+                {
+                    wss_jvalue(wss, *jvalue) << L",";
+                }
+                else
+                {
+                    wss_jvalue(wss, *jvalue);
+                }
+            }
+            else
+            {
+                if (i < wkeys.size() - 1)
+                {
+                    if (jvalue->type() == JsonW::OBJECT)
+                    {
+                        comma_in_function = false;
+                        wss_jobject(wss, *jvalue, singleline, level_plus, true);
+                    }
+                    else if (jvalue->type() == JsonW::ARRAY)
+                    {
+                        comma_in_function = false;
+                        wss_jarray(wss, *jvalue, singleline, level_plus, true);
+                    }
+                    else
+                    {
+                        wss_jvalue(wss, *jvalue, singleline, level_plus) << L",";
+                    }
+                }
+                else
+                {
+                    wss_jvalue(wss, *jvalue);
+                }
+            }
+            
+            if ( singleline == false && comma_in_function )
+            {
+                wss << std::endl;
+            }
+        }
+
+        if ( singleline )
+        {
+            wss << L"}";
+        }
+        else if ( addcomma )
+        {
+            wss_intent(wss, level) << L"}," << std::endl;
+        }
+        else
+        {
+            wss_intent(wss, level) << L"}" << std::endl;
+        }
+                
+        return wss;
+    }
+    
+    static std::wstringstream& wss_jarray(std::wstringstream& wss, const JsonW& jarray, 
+        bool singleline = true, size_t level = 0, bool addcomma = false )
+    {
+        size_t size = jarray.size();
+        size_t level_plus = 0;
+        
+        if ( singleline == false )
+        {
+            level_plus = level + 1;
+        }
+        
+        wss_intent(wss, level) << L"[";
+        
+        if ( singleline == false )
+        {
+            wss << std::endl;
+        }
+        
+        for (size_t i = 0; i < size; i++)
+        {
+            JsonW* jvalue = jarray.get(i);
+            bool newline_end = true;
+
+            if (singleline == false)
+            {
+                size_t estimate_size = 0;
+                std::wstringstream wsstmp;
+                wss_jvalue(wsstmp, *jvalue);
+                estimate_size = wsstmp.str().length();
+
+                if (jvalue->type() == JsonW::OBJECT && 
+                    ( jvalue->size() > 1 || estimate_size > 20))
+                {
+                    newline_end = false;
+                    if (i < size - 1)
+                    {
+                        wss_jobject(wss, *jvalue, singleline, level_plus, true);
+                    }
+                    else
+                    {
+                        wss_jobject(wss, *jvalue, singleline, level_plus);
+                    }
+                }
+                else if (jvalue->type() == JsonW::ARRAY && estimate_size > 20 )
+                {
+                    newline_end = false;
+                    if (i < size - 1)
+                    {  
+                        wss_jarray(wss, *jvalue, singleline, level_plus, true);
+                    }
+                    else
+                    {
+                        wss_jarray(wss, *jvalue, singleline, level_plus);
+                    }
+                }
+                else
+                {
+                    wss_intent(wss, level_plus);
+                    wss_jvalue(wss, *jvalue);
+
+                    if (i < size - 1)
+                    {
+                        wss << L",";
+                    }
+                }
+            }
+            else
+            {
+                wss_jvalue(wss, *jvalue, singleline, level_plus);
 
                 if (i < size - 1)
                 {
                     wss << L",";
                 }
             }
-            wss << L"]";
+            
+            if ( singleline == false && newline_end)
+            {
+                wss << std::endl;
+            }
         }
-        case JsonW::BAD:
-            return;
-        default:
-            break;
+        
+        if ( singleline )
+        {
+            wss <<  L"]";
         }
+        else if ( addcomma )
+        {
+            wss_intent(wss, level) << L"]," << std::endl;
+        }
+        else
+        {
+            wss_intent(wss, level) << L"]" << std::endl;
+        }
+        
+        return wss;
+    }
+    
+    static std::wstringstream& wss_intent( std::wstringstream& wss, size_t level )
+    {
+        if ( level == 0 )
+        {
+            return wss;
+        }
+        
+        std::wstring intent(level * 4, L' ');
+        wss << intent;
+        return wss;
     }
 
     // private static help function, write string into string buffer in json format 
-    static void wss_json_string(std::wstringstream& wss, const std::wstring& wstr)
+    static std::wstringstream& wss_string(std::wstringstream& wss, const std::wstring& wstr)
     {
         wss << L"\"";
 
@@ -1576,6 +1803,8 @@ private:
         }
 
         wss << L"\"";
+        
+        return wss;
     }
 
 private:

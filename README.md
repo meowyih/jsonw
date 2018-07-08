@@ -282,7 +282,7 @@ An _array_ contains multiple values. Here is an example shows how to access all 
     
 ```    
 
-# Avoiding deep copying
+# Avoid deep copying
 
 Consider the code below.
 
@@ -478,6 +478,18 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // delete a value inside json array by index, 
     // return false if no such value
     bool erase(size_t idx);
+
+```
+
+## Format and Output
+
+``` c++
+
+    // format json data into utf8 text in json standard
+    std::string text() const;
+    
+    // format json data into ucs text
+    std::string wtext() const;
 
 ```
 

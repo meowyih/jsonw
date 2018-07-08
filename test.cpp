@@ -102,7 +102,7 @@ void read_json_from_utf8_file()
     JsonW json(fin);
 
     // json in utf8
-    std::cout << json << std::endl;
+    std::cout << json  << std::endl;
 }
 
 // show how to create json as below programatically
