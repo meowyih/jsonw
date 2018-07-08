@@ -22,8 +22,8 @@ void read_json_from_utf8_file();
 //     [
 //         true,
 //         {
-//             "txt2": "some text2",
-//             "num2": 456
+//             "null": null,
+//             "num2": 0.456
 //         }
 //     ]
 // }
