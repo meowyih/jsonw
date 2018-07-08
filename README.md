@@ -8,7 +8,7 @@ Yih Horng|yhorng75@gmail.com
 
 *JsonW* is a *_C++11_* single header Json tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project. 
 
-I know there are already plenty of C++ Json libraries out there. The reason I reinvented the wheel is just for fun.
+I know there are already plenty of C++ Json libraries out there. But it is my habit to reinvented the wheel. :boom:
 
 # About Json 
 
@@ -16,14 +16,14 @@ General introduction is here: https://www.json.org/
 
 Here are somethings that *JsonW* user needs to know.
 
-1. Json text (JsonTextW) is an utf8 encoding text contains a _value_ (JsonValueW).
+1. Json text is an utf8 encoding text contains a _value_.
 
 [RFC7159](https://www.rfc-editor.org/info/rfc7159)
 > JSON-text = ws value ws
 
-2. A _value_ (JsonValueW) is either a number, a string, a boolean, a null, an _object_ (JsonObjectW) or an _array_ (JsonArrayW).
-3. An _object_ (JsonObjectW) is a set of name/_value_ (JsonValueW) pair. 
-4. An _array_ (JsonArrayW) is a collection of _value_ (JsonValueW).
+2. A _value_ is either a number, a string, a boolean, a null, an _object_  or an _array_.
+3. An _object_ is a set of name/_value_ pair. 
+4. An _array_ is a collection of _value_.
 
 # About character set
 
@@ -296,7 +296,7 @@ using namespace octillion;
 ```
 It is not a problem when data size is small, however, if JsonW contains huge data, says 100MB. Deep copy might be a problem if the memory usage is a concern.
 
-If caller has such concern, do not use assignment operaotr (i.e. '='). Use size(JsonW::OBJECT)/get()/add()/keys() for json object and size(JsonW::ARRAY)/get()/add() for json array.
+If caller has such concern, do not use assignment operaotr (i.e. '='). Use size()/get()/add()/keys() for json object and size()/get()/add() for json array.
 ``` c++
 using namespace octillion;
 
@@ -335,7 +335,9 @@ using namespace octillion;
 
 # Memory leak detection
 
-In _jsonw.hpp_, line#19, there is a macro named OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION. If you enable it, JsonW will keep track of all the new/delete function call for JsonW class. Then show the memory leak report by calling octillion::JsonW::memory_leak_detect_result() static function. There is a mutex lock during the detection. Do not enable this macro unless you really want to check the memory leak.
+In _jsonw.hpp_, line#19, there is a macro named `OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION`. 
+
+If you enable it, JsonW will keep track of all the new/delete function call for JsonW class. Then show the memory leak report by calling `octillion::JsonW::memory_leak_detect_result()` static function. There is a mutex lock involved during the detection. Do not enable this macro unless you really want to check the memory leak.
 
 # Known issues and TODO
 
