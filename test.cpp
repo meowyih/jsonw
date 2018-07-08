@@ -52,7 +52,10 @@ int main()
     how_to_work_with_array();
     how_to_avoid_deep_copy();
 
+    // see README.md for the memory leak detection
+#ifdef  OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
     octillion::JsonW::memory_leak_detect_result();
+#endif
 
     return 0;
 }
@@ -117,7 +120,7 @@ void read_json_from_utf8_file()
 // }
 void create_json_programatically()
 {
-    // create two jobjects
+    // create two JsonW object
     JsonW jobject1, jobject2;
     
     jobject1[u8"txt1"] = "some text1";
@@ -236,6 +239,9 @@ void how_to_work_with_object()
         return;
     }
 
+    std::cout << "json object contains " << jobject.size() 
+        << " name-pair value(s)" << std::endl;
+
     // list all keys in object in std::wstring type and std::string type
     std::vector<std::string> keys;
 
@@ -257,7 +263,7 @@ void how_to_work_with_array()
     // create a test json text using ascii (utf8) string
     octillion::JsonW jarray(u8"[12,13,-42,20]");
 
-    std::cout << "array size is " << jarray.size() << std::endl;
+    std::cout << "json array contains " << jarray.size() << " value(s) in it" << std::endl;
 
     // list each value (again, for demo purpose, we 'magically' know all value in are integer)
     for (size_t i = 0; i < jarray.size(); i++)
@@ -284,11 +290,11 @@ void how_to_avoid_deep_copy()
 
     // it is not a problem when data size is small, however,
     // if JsonW contains huge data, says 100MB. Deep copy might
-    // be a problem the memory usage is a concern.
+    // be a problem if the memory usage is a concern.
 
     // If caller has such concern, do not use assignment 
-    // operaotr (i.e. '='). Use find()/key()/set() for json object
-    // and size()/at()/add() for json array
+    // operaotr (i.e. '='). Use size(JsonW::OBJECT)/get()/add()/keys() for json object
+    // and size(JsonW::ARRAY)/get()/add() for json array
     JsonW *p_json, *p_object, *p_jarray;
 
     p_jarray = new JsonW();
@@ -302,17 +308,17 @@ void how_to_avoid_deep_copy()
     p_object = new JsonW();
 
     // "data" is a standard json string, see README.md for detail
-    p_object->set("data", new JsonW("\"data\"")); 
+    p_object->add("data", new JsonW("\"data\"")); 
 
     // assign p_jarray into p_object, it is not deep copy.
     // p_object just copy the address of p_jarray
-    p_object->set("array", p_jarray);
+    p_object->add("array", p_jarray);
 
     p_json = new JsonW();
 
     // assign p_object into p_json, it is not deep copy.
     // p_json just copy the address of p_object
-    p_json->set("object", p_object);
+    p_json->add("object", p_object);
 
     std::cout << "p_json:" << p_json->text() << std::endl;
 

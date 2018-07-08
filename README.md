@@ -233,6 +233,9 @@ using namespace octillion;
         std::cout << "error: json is not json object" << std::endl;
         return;
     }
+    
+    std::cout << "json object contains " << jobject.size() 
+        << " name-pair value(s)" << std::endl;
 
     // list all keys in object in std::wstring type and std::string type
     std::vector<std::string> keys;
@@ -244,7 +247,7 @@ using namespace octillion;
     // 'magically' knows it is string type since it was created by our own.
     for (size_t i = 0; i < keys.size(); i++)
     {
-        std::string key = keys.at(i);
+        std::string key = keys.get(i);
         std::string value = jobject[key].str();
         std::cout << "key-" << i << ":" << key << " value:" << value << std::endl;
     }
@@ -291,10 +294,9 @@ using namespace octillion;
     std::cout << "json:" << json << std::endl;
 
 ```
-It is not a problem when data size is small, however, if JsonW contains huge data, says 100MB. Deep copy might be a problem the memory usage is a concern.
+It is not a problem when data size is small, however, if JsonW contains huge data, says 100MB. Deep copy might be a problem if the memory usage is a concern.
 
-If caller has such concern, do not use assignment operaotr (i.e. '='). Use JsonW's member function find()/key()/set() for json object and size()/at()/add() for json array manipulation.
-
+If caller has such concern, do not use assignment operaotr (i.e. '='). Use size(JsonW::OBJECT)/get()/add()/keys() for json object and size(JsonW::ARRAY)/get()/add() for json array.
 ``` c++
 using namespace octillion;
 
@@ -311,17 +313,17 @@ using namespace octillion;
     p_object = new JsonW();
 
     // "data" is a standard json string, see README.md for detail
-    p_object->set("data", new JsonW("\"data\"")); 
+    p_object->add("data", new JsonW("\"data\"")); 
 
     // assign p_jarray into p_object, it is not deep copy.
     // p_object just copy the address of p_jarray
-    p_object->set("array", p_jarray);
+    p_object->add("array", p_jarray);
 
     p_json = new JsonW();
 
     // assign p_object into p_json, it is not deep copy.
     // p_json just copy the address of p_object
-    p_json->set("object", p_object);
+    p_json->add("object", p_object);
 
     std::cout << "p_json:" << p_json->text() << std::endl;
 

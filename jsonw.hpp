@@ -796,6 +796,33 @@ public:
     //
     // simple data accessors
     //
+
+    // get the number of data in this json value
+    // for number, string and boolean, return 1
+    // for array, return the number of values inside it
+    // for object, return the number of name-value pairs inside it
+    // others return 0
+    size_t size() const
+    {
+        switch (type_)
+        {
+        case BAD:
+            return 0;
+        case OBJECT:
+            return jobject_.size();
+        case ARRAY:
+            return jarray_.size();
+        case INTEGER:
+        case FLOAT:
+        case STRING:
+        case BOOLEAN:
+            return 1;
+        case NULLVALUE:
+        default:
+            return 0;
+        }
+    }
+
     int_fast64_t integer() const { return integer_; }
     long double frac() const { return frac_; }    
     std::wstring wstr() const { return wstring_; }
@@ -840,7 +867,7 @@ public:
 
     // get json value via specific key, return NULL if
     // no such entry or 'this' is not an json object
-    JsonW* find(const std::wstring& wkey) const
+    JsonW* get(const std::wstring& wkey) const
     {
         auto it = jobject_.find(wkey);
         if (it == jobject_.end())
@@ -851,17 +878,17 @@ public:
         return it->second;
     }
 
-    JsonW* find(const std::string& key) const
+    JsonW* get(const std::string& key) const
     {
         // convert to wstring
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
         std::wstring wkey = conv.from_bytes(key.data());
-        return find(wkey);
+        return get(wkey);
     }
 
     // set json value using specific key, return false
     // if key length is 0
-    bool set(std::wstring wkey, JsonW* jvalue)
+    bool add(std::wstring wkey, JsonW* jvalue)
     {
         if (wkey.length() == 0)
         {
@@ -884,27 +911,21 @@ public:
         return true;
     }
 
-    bool set(std::string key, JsonW* jvalue)
+    bool add(std::string key, JsonW* jvalue)
     {
         // convert to wstring
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
         std::wstring wkey = conv.from_bytes(key.data());
 
-        return set(wkey, jvalue);
+        return add(wkey, jvalue);
     }
 
     //
     // json array accessors
     //
 
-    // get the size of json array    
-    size_t size() const
-    {
-        return jarray_.size();
-    }
-
     // retrieve the json value in array
-    JsonW* at(size_t idx) const
+    JsonW* get(size_t idx) const
     {
         if (idx >= jarray_.size())
         {
@@ -1099,7 +1120,7 @@ public:
             }
         }
 
-        return *(at(index));
+        return *(get(index));
     }
 
     JsonW& operator[] (int index)
@@ -1124,7 +1145,7 @@ public:
             }
         }
 
-        return *(at(index));
+        return *(get(index));
     }
 
     JsonW& operator[] (const char* name)
@@ -1455,7 +1476,7 @@ private:
                 wss_json_string(wss, wkeys.at(i)); // name
                 wss << L":";
 
-                wss_junit(wss, *(junit.find(wkeys.at(i))));
+                wss_junit(wss, *(junit.get(wkeys.at(i))));
 
                 if (i < wkeys.size() - 1)
                 {
@@ -1472,7 +1493,7 @@ private:
             wss << L"[";
             for (size_t i = 0; i < size; i++)
             {
-                wss_junit(wss, *(junit.at(i)));
+                wss_junit(wss, *(junit.get(i)));
 
                 if (i < size - 1)
                 {
@@ -1545,32 +1566,27 @@ private:
         parse(tokens);
     }
 
+private:
+    // private member data
+    int type_ = NULLVALUE;
+    bool valid_ = false;
+
+    int_fast64_t integer_ = 0;
+    long double frac_ = 0.0;
+    std::wstring wstring_;
+    bool boolean_ = true;
+    
+    std::map<std::wstring, JsonW*> jobject_;
+    std::vector<JsonW*> jarray_;
+
+
 #ifdef OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 
 public:
-    static void* operator new(size_t size) 
+    static void* operator new(size_t size)
     {
         void* memory = malloc(size);
 
-        addrlock().lock();
-        if (addresstable().find(memory) == addresstable().end())
-        {            
-            addresstable().insert(memory);
-        }
-        else
-        {
-            std::cerr << "fatal error: duplicated address found in address_table_" 
-                << " file:" << __FILE__ << " line:" << __LINE__ << std::endl;
-        }
-        addrlock().unlock();
-
-        return memory;
-    }
-    
-    static void* operator new[](size_t size)
-    {
-        void* memory = malloc(size);
-        
         addrlock().lock();
         if (addresstable().find(memory) == addresstable().end())
         {
@@ -1585,7 +1601,26 @@ public:
 
         return memory;
     }
-    
+
+    static void* operator new[](size_t size)
+    {
+        void* memory = malloc(size);
+
+        addrlock().lock();
+        if (addresstable().find(memory) == addresstable().end())
+        {
+            addresstable().insert(memory);
+        }
+        else
+        {
+            std::cerr << "fatal error: duplicated address found in address_table_"
+                << " file:" << __FILE__ << " line:" << __LINE__ << std::endl;
+        }
+        addrlock().unlock();
+
+        return memory;
+    }
+
     static void operator delete(void* p)
     {
         addrlock().lock();
@@ -1618,7 +1653,7 @@ public:
         addrlock().unlock();
     }
 
-    static void memory_leak_detect_result()
+        static void memory_leak_detect_result()
     {
         if (addresstable().size() > 0)
         {
@@ -1651,21 +1686,6 @@ private:
     }
 
 #endif // OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
-
-private:
-    // private member data
-    int type_ = NULLVALUE;
-    bool valid_ = false;
-
-    int_fast64_t integer_ = 0;
-    long double frac_ = 0.0;
-    std::wstring wstring_;
-    bool boolean_ = true;
-    
-    std::map<std::wstring, JsonW*> jobject_;
-    std::vector<JsonW*> jarray_;
-
-
 };
 
-#endif
+#endif // OCTILLION_JSONW_HEADER
