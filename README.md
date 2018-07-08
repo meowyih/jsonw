@@ -486,10 +486,14 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
 ``` c++
 
     // format json data into utf8 text in json standard
-    std::string text() const;
+    // set singleline to false to make the return data
+    // more readable
+    std::string text( bool singleline = true ) const;
     
     // format json data into ucs text
-    std::string wtext() const;
+    // set singleline to false to make the return data
+    // more readable
+    std::string wtext( bool singleline = true ) const;
 
 ```
 
@@ -503,4 +507,3 @@ If you enable it, JsonW will keep track of all the new/delete function call for 
 
 1. *JsonW* does NOT support the big number. The Json contains number that greater than LLONG_MAX/DBL_MAX  or less than LLONG_MIN/DBL_MIN  is treated as invalid during creation.
 2. *JsonW* does NOT handle the memory overflow when reading or creating super massive Json object. If you try to feed several terabytes data in it, the behavior is undefined.
-3. *JsonW* does NOT support _pretty format_ output yet. When calling _text()_ or _wtext()_, the retrurns data is a single-line text in utf8 or usc encoding.
