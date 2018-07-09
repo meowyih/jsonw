@@ -1046,6 +1046,112 @@ public:
         return add(wkey, jvalue);
     }
 
+    bool add(std::wstring wkey, long long integer)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->integer(integer);
+        return add(wkey, jvalue);
+    }
+
+    bool add(std::wstring wkey, long integer)
+    {
+        return add(wkey, (long long)integer);
+    }
+
+    bool add(std::wstring wkey, int integer)
+    {
+        return add(wkey, (long long)integer);
+    }
+
+    bool add(std::wstring wkey, short integer)
+    {
+        return add(wkey, (long long)integer);
+    }
+
+    bool add(std::string key, long long integer)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->integer(integer);
+        return add(key, jvalue);
+    }
+
+    bool add(std::string key, long integer)
+    {
+        return add(key, (long long)integer);
+    }
+
+    bool add(std::string key, int integer)
+    {
+        return add(key, (long long)integer);
+    }
+
+    bool add(std::string key, short integer)
+    {
+        return add(key, (long long)integer);
+    }
+
+    bool add(std::wstring wkey, long double frac)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->frac(frac);
+        return add(wkey, jvalue);
+    }
+
+    bool add(std::wstring wkey, double frac)
+    {
+        return add(wkey, (long double)frac);
+    }
+
+    bool add(std::wstring wkey, float frac)
+    {
+        return add(wkey, (long double)frac);
+    }
+
+    bool add(std::string key, long double frac)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->frac(frac);
+        return add(key, jvalue);
+    }
+
+    bool add(std::string key, double frac)
+    {
+        return add(key, (long double)frac);
+    }
+
+    bool add(std::string key, float frac)
+    {
+        return add(key, (long double)frac);
+    }
+
+    bool add(std::wstring wkey, std::wstring wstr)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->wstr(wstr);
+        return add(wkey, jvalue);
+    }
+
+    bool add(std::string key, std::string str)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->str(str);
+        return add(key, jvalue);
+    }
+
+    bool add(std::wstring wkey, bool boolean )
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->boolean(boolean);
+        return add(wkey, jvalue);
+    }
+
+    bool add(std::string key, bool boolean)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->boolean(boolean);
+        return add(key, jvalue);
+    }
+
     //
     // json array accessors
     //
@@ -1082,6 +1188,66 @@ public:
         
         valid_ = true;        
         return true;
+    }
+
+    bool add(long long integer)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->integer(integer);
+        return add(jvalue);
+    }
+
+    bool add(long integer)
+    {
+        return add((long long)integer);
+    }
+
+    bool add(int integer)
+    {
+        return add((long long)integer);
+    }
+
+    bool add(short integer)
+    {
+        return add((long long)integer);
+    }
+
+    bool add(long double frac)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->frac(frac);
+        return add(jvalue);
+    }
+
+    bool add(double frac)
+    {
+        return add((long double)frac);
+    }
+
+    bool add(float frac)
+    {
+        return add((long double)frac);
+    }
+
+    bool add(std::wstring wstr)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->wstr(wstr);
+        return add(jvalue);
+    }
+
+    bool add(std::string str)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->str(str);
+        return add(jvalue);
+    }
+
+    bool add(bool boolean)
+    {
+        JsonW* jvalue = new JsonW();
+        jvalue->boolean(boolean);
+        return add(jvalue);
     }
     
     // delete a value inside json array by index, 

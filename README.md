@@ -282,7 +282,7 @@ An _array_ contains multiple values. Here is an example shows how to access all 
     
 ```    
 
-# Avoid deep copying
+# Avoid deep copy
 
 Consider the code below.
 
@@ -470,11 +470,41 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     JsonW* get(const std::wstring& wkey) const;
     JsonW* get(const std::string& key) const;
     
-    // add a name-pair value into json object
+    // add a name-value pair into json object
     // after adding the jvalue, 'this' will take care of the
     // memory releasing inside its destructor.
     bool add(std::wstring wkey, JsonW* jvalue);
     bool add(std::string key, JsonW* jvalue);
+    
+    // add name-value pair int to json object, which value is integer
+    bool add(std::wstring wkey, long long integer);
+    bool add(std::wstring wkey, long integer);
+    bool add(std::wstring wkey, int integer);
+    bool add(std::wstring wkey, short integer);
+    bool add(std::string key, long long integer);
+    bool add(std::string key, long integer);
+    bool add(std::string key, int integer);
+    bool add(std::string key, short integer);
+    
+    // add name-value pair int to json object, which value is floating
+    bool add(std::wstring wkey, long double frac);
+    bool add(std::wstring wkey, double frac);
+    bool add(std::wstring wkey, float frac);
+    bool add(std::string key, long double frac);
+    bool add(std::string key, double frac);
+    bool add(std::string key, float frac);
+    
+    // add name-value pair int to json object, which value is string
+    bool add(std::wstring wkey, std::wstring wstr);
+    bool add(std::string key, std::string str);
+    
+    // add name-value pair int to json object, which value is boolean
+    bool add(std::wstring wkey, bool boolean );
+    bool add(std::string key, bool boolean);
+    
+    // NOTE:
+    // DO NOT use 'add(u"key", NULL)' to assign null value, the keyword 'NULL' is 0.
+    // Use 'add(u8"key", new JsonW())' instead
     
     // delete a name-pair value inside json object by the name
     // return false if no such value
@@ -498,7 +528,29 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // add a value into json array
     // after adding the jvalue, 'this' will take care of the
     // memory releasing inside its destructor.
-    bool add(JsonW* junit)
+    bool add(JsonW* junit);
+    
+    // add an integer into array
+    bool add(long long integer);
+    bool add(long integer);
+    bool add(int integer);
+    bool add(short integer);
+    
+    // add a floating into array
+    bool add(long double frac);
+    bool add(double frac);
+    bool add(float frac);
+    
+    // add a string into array
+    bool add(std::wstring wstr);
+    bool add(std::string str);
+    
+    // add a boolean into array
+    bool add(bool boolean);
+    
+    // NOTE:
+    // DO NOT use 'add(NULL)' to assign null value, the keyword 'NULL' is 0.
+    // Use 'add(new JsonW())' instead
     
     // delete a value inside json array by index, 
     // return false if no such value
