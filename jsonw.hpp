@@ -833,6 +833,109 @@ public:
     }
     bool boolean() const { return boolean_; }
 
+    void integer(long long integer)
+    {
+        clean();
+        type_ = INTEGER;
+        integer_ = integer;
+    }
+
+    void frac(long double frac)
+    {
+        clean();
+        type_ = FLOAT;
+        frac_ = frac;
+    }
+
+    void wstr(const std::wstring& wstr)
+    {
+        clean();
+        type_ = STRING;
+        wstring_ = wstr;
+    }
+
+    void wstr(const wchar_t* wstr)
+    {
+        clean();
+        type_ = STRING;
+        wstring_ = wstr;
+    }
+
+    void wstr(const wchar_t* wstr, size_t length)
+    {
+        clean();
+        type_ = STRING;
+        std::wstring usc(wstr, length);
+        wstring_ = usc;
+    }
+
+    void str(const std::string& str)
+    {
+        clean();
+        type_ = STRING;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        wstring_ = conv.from_bytes(str);
+    }
+
+    void str(const char* str)
+    {
+        clean();
+        type_ = STRING;
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        wstring_ = conv.from_bytes(str);
+    }
+
+    void str(const char* str, size_t length)
+    {
+        clean();
+        type_ = STRING;
+        std::string utf8(str, length);
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        wstring_ = conv.from_bytes(utf8);
+    }
+
+    void boolean(bool boolean)
+    {
+        clean();
+        type_ = BOOLEAN;
+        boolean_ = boolean;
+    }
+
+    void reset()
+    {
+        clean();
+    }
+
+    void json(const std::string& text)
+    {
+        clean();
+
+        // convert to wstring
+        std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+        std::wstring wstr = conv.from_bytes(text);
+
+        // convert to wstringbuf
+        std::wstringbuf strBuf(wstr.data());
+
+        // convert to wistream
+        std::wistream wins(&strBuf);
+
+        // constructor with std::wstring parameter
+        init(wins);
+    }
+
+    void json(const char* text)
+    {
+        std::string utf8(text);
+        json(utf8);
+    }
+
+    void json(const char* text, size_t size)
+    {
+        std::string utf8(text, size);
+        json(utf8);
+    }
+
     //
     // json object accessor member
     //
@@ -1822,6 +1925,9 @@ private:
             delete it;
         }
         jarray_.clear();
+
+        type_ = NULLVALUE;
+        valid_ = true;
     }
 
     // private help function, read json data from wistream   

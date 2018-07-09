@@ -425,6 +425,31 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // for OBJECT, return the number of name-value pairs inside it
     // others return 0
     size_t size() const;
+    
+    // set json value to 'integer' and type to INTEGER
+    void integer(long long integer);
+    
+    // set json value to 'frac' and type to FLOAT
+    void frac(long double frac);
+    
+    // set json value to 'str (wstr)' and type to STRING
+    void wstr(const std::wstring& wstr);
+    void wstr(const wchar_t* wstr);
+    void wstr(const wchar_t* wstr, size_t length);
+    void str(const std::string& str);
+    void str(const char* str);
+    void str(const char* str, size_t length);
+    
+    // set json value to 'boolean' and type to BOOLEAN
+    void boolean(bool boolean);
+    
+    // set json value to null and type to NULLVALUE
+    void reset();
+    
+    // set value based on standard utf8 json text
+    void json(const std::string& text);
+    void json(const char* text);
+    void json(const char* text, size_t size);
 
 ```
 
