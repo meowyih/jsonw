@@ -8,6 +8,7 @@
 #include <iostream> 
 #include <fstream>   // read json from file 
 #include <sstream>   // string buffer
+#include <cmath>     // pow
 #include <queue>     // token container
 #include <string>    // string and wstring
 #include <map>       // json object container
@@ -16,7 +17,7 @@
 #include <codecvt>   // ucs utf8 convertor
 
 // keep track of all the JsonW creation (new) and deletion (delete) 
-// #define OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
+#define OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 #ifdef  OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 #include <cstdlib> // c style malloc and free for memory leak detection
 #include <set>     // store addresses
@@ -1428,7 +1429,7 @@ public:
         {
             for (size_t i = size(); i <= index; i++)
             {
-                add(NULL);
+                add( new JsonW() );
             }
         }
 
@@ -1453,7 +1454,7 @@ public:
         {
             for (size_t i = size(); i <= (size_t)index; i++)
             {
-                add(NULL);
+                add(new JsonW());
             }
         }
 
