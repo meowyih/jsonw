@@ -1706,6 +1706,7 @@ private:
             case JsonTokenW::Type::NumberInteger:
             case JsonTokenW::Type::NumberFloat:
             case JsonTokenW::Type::Boolean:
+            case JsonTokenW::Type::String:
             case JsonTokenW::Type::Null:
             {
                 JsonW* junit = new JsonW(tokens);
