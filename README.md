@@ -6,9 +6,9 @@ Yih Horng|yhorng75@gmail.com
 
 # About JsonW
 
-*JsonW* is a *_C++11_* single header Json tool that underlying using wchar_t/std::wstring to store text value. It is part of the [octillion-cubes](https://github.com/meowyih/octillion-cubes) project. 
+*JsonW* is a *_C++11_* single header Json tool that underlying using wchar_t/std::wstring to store text value. 
 
-I know there are already plenty of C++ Json libraries out there. It is my habit to reinvent the wheel. :boom:
+I know there are already plenty of C++ Json libraries out there. But reinventing the wheel is really fun. :boom:
 
 # About Json 
 
@@ -40,7 +40,6 @@ All the sample codes in this section area available in _test.cpp_.
 ## Read json from utf8 data
 
 ``` c++
-using namespace octillion;
 
     // literal 'u8' is not necessary if compiler uses utf8 as default 
     char jsondata[] = u8"{\"name\":\"meowyih\",\"age\":123}";
@@ -56,7 +55,6 @@ using namespace octillion;
 ## Read json from utf8 file
 
 ``` c++
-using namespace octillion;
 
     // 'sample.json' must utf-8 format without BOM
     std::string jsonfile = "sample.json";
@@ -101,7 +99,6 @@ Assume I want to create a JsonTextW in the structure like this.
 Here is how to do it.
 
 ``` c++
-using namespace octillion;
 
     // create two JsonW object
     JsonW jobject1, jobject2;
@@ -133,7 +130,6 @@ using namespace octillion;
 _JsonW_ represents a _value_ defined in json standard. This example shows how to handle the data in it based on the different type of value.
 
 ``` c++
-using namespace octillion;
 
     // jvalue is a null as default
     JsonW jvalue;
@@ -215,10 +211,9 @@ using namespace octillion;
 An json object contains multiple key-value pairs. Here is an example shows how to get all keys in jobject, as well as retrieving the value via the key. 
 
 ``` c++
-using namespace octillion;
 
     // create a test json text using ascii (utf8) string
-    octillion::JsonW jobject(u8"{\"last\":\"Lee\",\"first\":\"Peter\"}");
+    JsonW jobject(u8"{\"last\":\"Lee\",\"first\":\"Peter\"}");
 
     // check if json is valid
     if (jobject.valid() == false)
@@ -228,7 +223,7 @@ using namespace octillion;
     }
 
     // check if json has object
-    if (jobject.type() != octillion::JsonW::OBJECT)
+    if (jobject.type() != JsonW::OBJECT)
     {
         std::cout << "error: json is not json object" << std::endl;
         return;
@@ -247,7 +242,7 @@ using namespace octillion;
     // 'magically' knows it is string type since it was created by our own.
     for (size_t i = 0; i < keys.size(); i++)
     {
-        std::string key = keys.get(i);
+        std::string key = keys.at(i);
         std::string value = jobject[key].str();
         std::cout << "key-" << i << ":" << key << " value:" << value << std::endl;
     }
@@ -265,7 +260,7 @@ An _array_ contains multiple values. Here is an example shows how to access all 
 ``` c++
     
     // create a test json text using ascii (utf8) string
-    octillion::JsonW jarray(u8"[12,13,-42,20]");
+    JsonW jarray(u8"[12,13,-42,20]");
 
     std::cout << "array size is " << jarray.size() << std::endl;
 
@@ -287,7 +282,6 @@ An _array_ contains multiple values. Here is an example shows how to access all 
 Consider the code below.
 
 ``` c++
-using namespace octillion;
 
     JsonW json, jobject, jarray;
     
@@ -307,38 +301,33 @@ It is not a problem when data size is small, however, if JsonW contains huge dat
 
 If caller has such concern, do not use assignment operaotr (i.e. '='). Use size()/get()/add()/keys() for json object and size()/get()/add() for json array.
 ``` c++
-using namespace octillion;
 
-    JsonW *p_json, *p_object, *p_jarray;
+    std::shared_ptr<JsonW> p_json, p_object, p_jarray;
 
-    p_jarray = new JsonW();
+    p_jarray = std::make_shared<JsonW>();
 
     // null is a standard json string, see README.md for detail
-    p_jarray->add(new JsonW(u8"null"));
+    p_jarray->add(std::make_shared<JsonW>(u8"null"));
 
     // 10 is a standard json string, see README.md for detail
-    p_jarray->add(new JsonW(u8"10"));
+    p_jarray->add(std::make_shared<JsonW>(u8"10"));
 
-    p_object = new JsonW();
+    p_object = std::make_shared<JsonW>();
 
     // "data" is a standard json string, see README.md for detail
-    p_object->add(u8"data", new JsonW(u8"\"data\"")); 
+    p_object->add(u8"data", std::make_shared<JsonW>(u8"\"data\"")); 
 
     // assign p_jarray into p_object, it is not deep copy.
     // p_object just copy the address of p_jarray
     p_object->add("array", p_jarray);
 
-    p_json = new JsonW();
+    p_json = std::make_shared<JsonW>();
 
     // assign p_object into p_json, it is not deep copy.
     // p_json just copy the address of p_object
     p_json->add("object", p_object);
 
     std::cout << "p_json:" << p_json->text() << std::endl;
-
-    // when delete the p_json, all the JsonW objects in it
-    // would be deleted, includes p_jobject and p_jarray.
-    delete p_json;
 
 ```
 
@@ -473,8 +462,8 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // add a name-value pair into json object
     // after adding the jvalue, 'this' will take care of the
     // memory releasing inside its destructor.
-    bool add(std::wstring wkey, JsonW* jvalue);
-    bool add(std::string key, JsonW* jvalue);
+    bool add(std::wstring wkey, std::shared_ptr<JsonW> jvalue);
+    bool add(std::string key, std::shared_ptr<JsonW> jvalue);
     
     // add name-value pair int to json object, which value is integer
     bool add(std::wstring wkey, long long integer);
@@ -504,7 +493,7 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     
     // NOTE:
     // DO NOT use 'add(u"key", NULL)' to assign null value, the keyword 'NULL' is 0.
-    // Use 'add(u8"key", new JsonW())' instead
+    // Use 'add(u8"key", std::make_shared<JsonW>())' instead
     
     // delete a name-pair value inside json object by the name
     // return false if no such value
@@ -528,7 +517,7 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // add a value into json array
     // after adding the jvalue, 'this' will take care of the
     // memory releasing inside its destructor.
-    bool add(JsonW* junit);
+    bool add(std::shared_ptr<JsonW> junit);
     
     // add an integer into array
     bool add(long long integer);
@@ -550,7 +539,7 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     
     // NOTE:
     // DO NOT use 'add(NULL)' to assign null value, the keyword 'NULL' is 0.
-    // Use 'add(new JsonW())' instead
+    // Use 'add(std::make_shared<JsonW>())' instead
     
     // delete a value inside json array by index, 
     // return false if no such value
@@ -573,12 +562,6 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     std::string wtext( bool singleline = true ) const;
 
 ```
-
-# Memory leak detection
-
-In _jsonw.hpp_, line#19, there is a macro named `OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION`. 
-
-If you enable it, JsonW will keep track of all the new/delete function call for JsonW class. Then show the memory leak report by calling `octillion::JsonW::memory_leak_detect_result()` static function. There is a mutex lock involved during the detection. Do not enable this macro unless you really want to check the memory leak.
 
 # Known issues and TODO
 

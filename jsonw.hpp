@@ -15,25 +15,12 @@
 #include <vector>    // array container
 #include <locale>    // ucs utf8 convertor
 #include <codecvt>   // ucs utf8 convertor
-
-// keep track of all the JsonW creation (new) and deletion (delete) 
-#define OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
-#ifdef  OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
-#include <cstdlib> // c style malloc and free for memory leak detection
-#include <set>     // store addresses
-#include <mutex>   // lock during writing address table
-#endif 
-
-namespace octillion
-{
-    class JsonTokenW;
-    class JsonW;
-}
+#include <memory>    // smart pointer
 
 // JsonTokenW presents a token in json data. It has a static member function 
 // 'parse()' that can parse the json from text to token. However, JsonW caller 
 // does not need to access this class at all. See README.md for detail.
-class octillion::JsonTokenW
+class JsonTokenW
 {
 public:
     enum class Type
@@ -570,7 +557,7 @@ private:
 // represents a json 'value' defined in json standard. In other words,
 // JsonW could be a number, a string, a boolean, a null, a json array or
 // an json object. See README.md for the usage.
-class octillion::JsonW
+class JsonW
 {
 public:
     // type of jsonw
@@ -696,8 +683,8 @@ public:
         clean();
     }
 
-private:    
-    explicit JsonW(std::queue<JsonTokenW>& tokens)
+public:    
+    JsonW(std::queue<JsonTokenW>& tokens)
     {
         parse(tokens);
     }
@@ -776,13 +763,13 @@ private:
         {
             std::wstring name = it.first;
 
-            JsonW* jvalue = new JsonW(*(it.second));
+            std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>(*(it.second.get()));
             jobject_[name] = jvalue;
         }
 
         for (const auto& it : rhs.jarray_)
         {
-            JsonW* jvalue = new JsonW(*it);
+            std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>(*(it.get()));
             jarray_.push_back(jvalue);
         }
     }
@@ -971,7 +958,7 @@ public:
 
     // get json value via specific key, return NULL if
     // no such entry or 'this' is not an json object
-    JsonW* get(const std::wstring& wkey) const
+    std::shared_ptr<JsonW> get(const std::wstring& wkey) const
     {
         auto it = jobject_.find(wkey);
         if (it == jobject_.end())
@@ -982,7 +969,7 @@ public:
         return it->second;
     }
 
-    JsonW* get(const std::string& key) const
+    std::shared_ptr<JsonW> get(const std::string& key) const
     {
         // convert to wstring
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
@@ -1000,7 +987,6 @@ public:
             return false;
         }
         
-        delete it->second;
         jobject_.erase(it);
         return true;
     }
@@ -1015,7 +1001,7 @@ public:
 
     // set json value using specific key, return false
     // if key length is 0
-    bool add(std::wstring wkey, JsonW* jvalue)
+    bool add(std::wstring wkey, std::shared_ptr<JsonW> jvalue)
     {
         if (wkey.length() == 0)
         {
@@ -1029,16 +1015,11 @@ public:
         }
         
         auto it = jobject_.find(wkey);
-        if (it != jobject_.end())
-        {
-            delete it->second;
-        }
-
         jobject_[wkey] = jvalue;
         return true;
     }
 
-    bool add(std::string key, JsonW* jvalue)
+    bool add(std::string key, std::shared_ptr<JsonW> jvalue)
     {
         // convert to wstring
         std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
@@ -1049,7 +1030,7 @@ public:
 
     bool add(std::wstring wkey, long long integer)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->integer(integer);
         return add(wkey, jvalue);
     }
@@ -1071,7 +1052,7 @@ public:
 
     bool add(std::string key, long long integer)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->integer(integer);
         return add(key, jvalue);
     }
@@ -1093,7 +1074,7 @@ public:
 
     bool add(std::wstring wkey, long double frac)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->frac(frac);
         return add(wkey, jvalue);
     }
@@ -1110,7 +1091,7 @@ public:
 
     bool add(std::string key, long double frac)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->frac(frac);
         return add(key, jvalue);
     }
@@ -1127,28 +1108,28 @@ public:
 
     bool add(std::wstring wkey, std::wstring wstr)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->wstr(wstr);
         return add(wkey, jvalue);
     }
 
     bool add(std::string key, std::string str)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->str(str);
         return add(key, jvalue);
     }
 
     bool add(std::wstring wkey, bool boolean )
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->boolean(boolean);
         return add(wkey, jvalue);
     }
 
     bool add(std::string key, bool boolean)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->boolean(boolean);
         return add(key, jvalue);
     }
@@ -1158,7 +1139,7 @@ public:
     //
 
     // retrieve the json value in array
-    JsonW* get(size_t idx) const
+    std::shared_ptr<JsonW> get(size_t idx) const
     {
         if (idx >= jarray_.size())
         {
@@ -1169,7 +1150,7 @@ public:
     }
 
     // add one json value into array
-    bool add(JsonW* junit)
+    bool add(std::shared_ptr<JsonW> junit)
     {
         if (type_ != ARRAY)
         {
@@ -1180,7 +1161,7 @@ public:
         if (junit == NULL)
         {
             // NULLVALUE json value
-            jarray_.push_back(new JsonW());
+            jarray_.push_back(std::make_shared<JsonW>());
         }
         else
         {
@@ -1193,7 +1174,7 @@ public:
 
     bool add(long long integer)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->integer(integer);
         return add(jvalue);
     }
@@ -1215,7 +1196,7 @@ public:
 
     bool add(long double frac)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->frac(frac);
         return add(jvalue);
     }
@@ -1232,21 +1213,21 @@ public:
 
     bool add(std::wstring wstr)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->wstr(wstr);
         return add(jvalue);
     }
 
     bool add(std::string str)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->str(str);
         return add(jvalue);
     }
 
     bool add(bool boolean)
     {
-        JsonW* jvalue = new JsonW();
+        std::shared_ptr<JsonW> jvalue = std::make_shared<JsonW>();
         jvalue->boolean(boolean);
         return add(jvalue);
     }
@@ -1264,8 +1245,7 @@ public:
         {
             return false;
         }
-        
-        delete jarray_.at( idx );
+
         jarray_.erase( jarray_.begin() + idx );
         
         return true;
@@ -1429,7 +1409,7 @@ public:
         {
             for (size_t i = size(); i <= index; i++)
             {
-                add( new JsonW() );
+                add(std::make_shared<JsonW>());
             }
         }
 
@@ -1454,7 +1434,7 @@ public:
         {
             for (size_t i = size(); i <= (size_t)index; i++)
             {
-                add(new JsonW());
+                add(std::make_shared<JsonW>());
             }
         }
 
@@ -1481,7 +1461,7 @@ public:
 
         if (jobject_.find(wname) == jobject_.end())
         {
-            jobject_.insert(std::pair<std::wstring, JsonW*>(wname, new JsonW()));
+            jobject_.insert(std::pair<std::wstring, std::shared_ptr<JsonW>>(wname, std::make_shared<JsonW>()));
         }
 
         return *(jobject_.find(wname)->second);
@@ -1507,7 +1487,7 @@ public:
 
         if (jobject_.find(wname) == jobject_.end())
         {
-            jobject_.insert(std::pair<std::wstring, JsonW*>(wname, new JsonW()));
+            jobject_.insert(std::pair<std::wstring, std::shared_ptr<JsonW>>(wname, std::make_shared<JsonW>()));
         }
 
         return *(jobject_.find(wname)->second);
@@ -1532,7 +1512,7 @@ public:
 
         if (jobject_.find(wname) == jobject_.end())
         {
-            jobject_.insert(std::pair<std::wstring, JsonW*>(wname, new JsonW()));
+            jobject_.insert(std::pair<std::wstring, std::shared_ptr<JsonW>>(wname, std::make_shared<JsonW>()));
         }
 
         return *(jobject_.find(wname)->second);
@@ -1554,7 +1534,7 @@ public:
 
         if (jobject_.find(wname) == jobject_.end())
         {
-            jobject_.insert(std::pair<std::wstring, JsonW*>(wname, new JsonW()));
+            jobject_.insert(std::pair<std::wstring, std::shared_ptr<JsonW>>(wname, std::make_shared<JsonW>()));
         }
 
         return *(jobject_.find(wname)->second);
@@ -1599,7 +1579,7 @@ public:
 
 private:
     // private static help function - parse token into json object 
-    static bool jobject(std::queue<JsonTokenW>& tokens, std::map<std::wstring, JsonW*>& jobject)
+    static bool jobject(std::queue<JsonTokenW>& tokens, std::map<std::wstring, std::shared_ptr<JsonW>>& jobject)
     {
         // Object must start with LeftCurlyBracket:'{' and minimum size is 2 '{' + '}'
         if (tokens.size() < 2 ||
@@ -1645,11 +1625,10 @@ private:
                 }
                 else
                 {
-                    JsonW* junit = new JsonW(tokens);
+                    std::shared_ptr<JsonW> junit = std::make_shared<JsonW>(tokens);
 
                     if (junit->valid() == false)
                     {
-                        delete junit;
                         return false;
                     }
                     else
@@ -1684,7 +1663,7 @@ private:
     }
 
     // private static help function - parse tokens into json array
-    static bool jarray(std::queue<JsonTokenW>& tokens, std::vector<JsonW*>& jarray)
+    static bool jarray(std::queue<JsonTokenW>& tokens, std::vector<std::shared_ptr<JsonW>>& jarray)
     {
         // Object must start with LeftCurlyBracket:'[' and minimum size is 2 '[' + ']'
         if (tokens.size() < 2 ||
@@ -1709,10 +1688,9 @@ private:
             case JsonTokenW::Type::String:
             case JsonTokenW::Type::Null:
             {
-                JsonW* junit = new JsonW(tokens);
+                std::shared_ptr<JsonW> junit = std::make_shared<JsonW>(tokens);
                 if (junit->valid() == false)
                 {
-                    delete junit;
                     return false;
                 }
 
@@ -1844,13 +1822,13 @@ private:
             // when we need to add std::endl after ':'
             // 1. value is json object
             // 2. value is json array and length + level*4 > 40
-            JsonW* jvalue = jobject.get(wkeys.at(i));
+            std::shared_ptr<JsonW> jvalue = jobject.get(wkeys.at(i));
              
             if ( singleline == false )
             {
                 size_t estimate_size = 0;
                 std::wstringstream wsstmp;
-                wss_jvalue(wsstmp, *jvalue);
+                wss_jvalue(wsstmp, *(jvalue.get()));
                 estimate_size = wsstmp.str().length();
 
                 if ( jvalue->type() == JsonW::OBJECT && jvalue->size() > 1 )
@@ -1886,11 +1864,11 @@ private:
             {
                 if (i < wkeys.size() - 1)
                 {
-                    wss_jvalue(wss, *jvalue) << L",";
+                    wss_jvalue(wss, *(jvalue.get())) << L",";
                 }
                 else
                 {
-                    wss_jvalue(wss, *jvalue);
+                    wss_jvalue(wss, *(jvalue.get()));
                 }
             }
             else
@@ -1900,21 +1878,21 @@ private:
                     if (jvalue->type() == JsonW::OBJECT)
                     {
                         comma_in_function = false;
-                        wss_jobject(wss, *jvalue, singleline, level_plus, true);
+                        wss_jobject(wss, *(jvalue.get()), singleline, level_plus, true);
                     }
                     else if (jvalue->type() == JsonW::ARRAY)
                     {
                         comma_in_function = false;
-                        wss_jarray(wss, *jvalue, singleline, level_plus, true);
+                        wss_jarray(wss, *(jvalue.get()), singleline, level_plus, true);
                     }
                     else
                     {
-                        wss_jvalue(wss, *jvalue, singleline, level_plus) << L",";
+                        wss_jvalue(wss, *(jvalue.get()), singleline, level_plus) << L",";
                     }
                 }
                 else
                 {
-                    wss_jvalue(wss, *jvalue);
+                    wss_jvalue(wss, *(jvalue.get()));
                 }
             }
             
@@ -1960,14 +1938,14 @@ private:
         
         for (size_t i = 0; i < size; i++)
         {
-            JsonW* jvalue = jarray.get(i);
+            std::shared_ptr<JsonW> jvalue = jarray.get(i);
             bool newline_end = true;
 
             if (singleline == false)
             {
                 size_t estimate_size = 0;
                 std::wstringstream wsstmp;
-                wss_jvalue(wsstmp, *jvalue);
+                wss_jvalue(wsstmp, *(jvalue.get()));
                 estimate_size = wsstmp.str().length();
 
                 if (jvalue->type() == JsonW::OBJECT && 
@@ -1976,11 +1954,11 @@ private:
                     newline_end = false;
                     if (i < size - 1)
                     {
-                        wss_jobject(wss, *jvalue, singleline, level_plus, true);
+                        wss_jobject(wss, *(jvalue.get()), singleline, level_plus, true);
                     }
                     else
                     {
-                        wss_jobject(wss, *jvalue, singleline, level_plus);
+                        wss_jobject(wss, *(jvalue.get()), singleline, level_plus);
                     }
                 }
                 else if (jvalue->type() == JsonW::ARRAY && estimate_size > 20 )
@@ -1988,17 +1966,17 @@ private:
                     newline_end = false;
                     if (i < size - 1)
                     {  
-                        wss_jarray(wss, *jvalue, singleline, level_plus, true);
+                        wss_jarray(wss, *(jvalue.get()), singleline, level_plus, true);
                     }
                     else
                     {
-                        wss_jarray(wss, *jvalue, singleline, level_plus);
+                        wss_jarray(wss, *(jvalue.get()), singleline, level_plus);
                     }
                 }
                 else
                 {
                     wss_intent(wss, level_plus);
-                    wss_jvalue(wss, *jvalue);
+                    wss_jvalue(wss, *(jvalue.get()));
 
                     if (i < size - 1)
                     {
@@ -2008,7 +1986,7 @@ private:
             }
             else
             {
-                wss_jvalue(wss, *jvalue, singleline, level_plus);
+                wss_jvalue(wss, *(jvalue.get()), singleline, level_plus);
 
                 if (i < size - 1)
                 {
@@ -2082,16 +2060,7 @@ private:
     // private help function, release all resource 
     void clean()
     {
-        for (const auto& it : jobject_)
-        {
-            delete it.second;
-        }
         jobject_.clear();
-
-        for (const auto& it : jarray_)
-        {
-            delete it;
-        }
         jarray_.clear();
 
         type_ = NULLVALUE;
@@ -2102,11 +2071,11 @@ private:
     void init(std::wistream& ins)
     {
         // set locale to utf8
-        std::queue<octillion::JsonTokenW> tokens;
+        std::queue<JsonTokenW> tokens;
         ins.imbue(std::locale(ins.getloc(), new std::codecvt_utf8<wchar_t>));
 
         // parse tokens
-        octillion::JsonTokenW::parse(ins, tokens);
+        JsonTokenW::parse(ins, tokens);
 
         // convert to junit
         parse(tokens);
@@ -2122,116 +2091,9 @@ private:
     std::wstring wstring_;
     bool boolean_ = true;
     
-    std::map<std::wstring, JsonW*> jobject_;
-    std::vector<JsonW*> jarray_;
+    std::map<std::wstring, std::shared_ptr<JsonW>> jobject_;
+    std::vector<std::shared_ptr<JsonW>> jarray_;
 
-
-#ifdef OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
-
-public:
-    static void* operator new(size_t size)
-    {
-        void* memory = malloc(size);
-
-        addrlock().lock();
-        if (addresstable().find(memory) == addresstable().end())
-        {
-            addresstable().insert(memory);
-        }
-        else
-        {
-            std::cerr << "fatal error: duplicated address found in address_table_"
-                << " file:" << __FILE__ << " line:" << __LINE__ << std::endl;
-        }
-        addrlock().unlock();
-
-        return memory;
-    }
-
-    static void* operator new[](size_t size)
-    {
-        void* memory = malloc(size);
-
-        addrlock().lock();
-        if (addresstable().find(memory) == addresstable().end())
-        {
-            addresstable().insert(memory);
-        }
-        else
-        {
-            std::cerr << "fatal error: duplicated address found in address_table_"
-                << " file:" << __FILE__ << " line:" << __LINE__ << std::endl;
-        }
-        addrlock().unlock();
-
-        return memory;
-    }
-
-    static void operator delete(void* p)
-    {
-        addrlock().lock();
-        if (addresstable().find(p) != addresstable().end())
-        {
-            addresstable().erase(p);
-            free(p);
-        }
-        else
-        {
-            std::cerr << "fatal error: could not found address in address_table_"
-                << " file:" << __FILE__ << " line:" << __LINE__ << std::endl;
-        }
-        addrlock().unlock();
-    }
-
-    static void operator delete[](void* p)
-    {
-        addrlock().lock();
-        if (addresstable().find(p) != addresstable().end())
-        {
-            addresstable().erase(p);
-            free(p);
-        }
-        else
-        {
-            std::cerr << "fatal error: could not found address in address_table_"
-                << " file:" << __FILE__ << " line:" << __LINE__ << std::endl;
-        }
-        addrlock().unlock();
-    }
-
-        static void memory_leak_detect_result()
-    {
-        if (addresstable().size() > 0)
-        {
-            for (void* address : addresstable())
-            {
-                std::cerr << "[DEBUG] memory leak address:" << address << std::endl;
-            }
-        }
-        else
-        {
-            std::cerr << "[DEBUG] no memory leak detected" << std::endl;
-        }
-
-        std::cerr << "[DEBUG] remove OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION macro to disable memory leak detection" << std::endl;
-    }
-
-
-private:
-    // Singleton set
-    static std::set<void*>& addresstable()
-    {
-        static std::set<void*> instance;
-        return instance;
-    }
-
-    static std::mutex& addrlock()
-    {
-        static std::mutex instance;
-        return instance;
-    }
-
-#endif // OCTILLION_JSONW_ENABLE_MEMORY_LEAK_DETECTION
 };
 
 #endif // OCTILLION_JSONW_HEADER
