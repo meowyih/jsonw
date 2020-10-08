@@ -956,14 +956,14 @@ public:
         return;
     }
 
-    // get json value via specific key, return NULL if
+    // get json value via specific key, return nullptr if
     // no such entry or 'this' is not an json object
     std::shared_ptr<JsonW> get(const std::wstring& wkey) const
     {
         auto it = jobject_.find(wkey);
         if (it == jobject_.end())
         {
-            return NULL;
+            return nullptr;
         }
 
         return it->second;
@@ -1143,7 +1143,7 @@ public:
     {
         if (idx >= jarray_.size())
         {
-            return NULL;
+            return nullptr;
         }
 
         return jarray_.at(idx);
@@ -1158,7 +1158,7 @@ public:
             type_ = ARRAY;
         }
 
-        if (junit == NULL)
+        if (junit == nullptr)
         {
             // NULLVALUE json value
             jarray_.push_back(std::make_shared<JsonW>());
