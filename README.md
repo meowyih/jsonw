@@ -456,8 +456,8 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // example, 'JsonW jvalue = jobject["key"]'),
     // the object returned from get() is the actual object stored inside
     // 'this'. See 'Avoiding deep copying' section for detail.
-    JsonW* get(const std::wstring& wkey) const;
-    JsonW* get(const std::string& key) const;
+    std::shared_ptr<JsonW> get(const std::wstring& wkey) const;
+    std::shared_ptr<JsonW> get(const std::string& key) const;
     
     // add a name-value pair into json object
     // after adding the jvalue, 'this' will take care of the
@@ -512,7 +512,7 @@ Caller can always call *valid()* to check if JsonW successcully constructed. Her
     // example, 'JsonW jvalue = jarray[3]'),
     // the object returned from get() is the actual object stored inside
     // 'this'. See 'Avoiding deep copying' section for detail.
-    JsonW* get(size_t idx) const;
+    std::shared_ptr<JsonW> get(size_t idx) const;
     
     // add a value into json array
     // after adding the jvalue, 'this' will take care of the
